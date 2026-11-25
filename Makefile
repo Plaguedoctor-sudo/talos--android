@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render audit-prep
+.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render audit-prep
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -15,6 +15,9 @@ test-trust: fixture
 test-mobile:
 	@chmod +x mobile/test/*.sh
 	./mobile/test/run-all-tests.sh
+
+test-attestation:
+	$(PYTHON) -m pytest tests/test_rats_verifier.py -v
 
 build-daemons:
 	gcc -O2 -Wall mobile/telephony/lrd-telephonyd.c -o mobile/telephony/lrd-telephonyd -lpthread

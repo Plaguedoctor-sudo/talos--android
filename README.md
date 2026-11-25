@@ -37,7 +37,7 @@ TALOS / LibreMobile OS is an open-source, bit-for-bit reproducible mobile operat
    - Zero-trust sensor feeds delivering synthetic white noise to microphones and pitch-black frames to cameras when unauthorized background access occurs.
 4. **ARGUS Mathematical Custody Spine**: Commits every system state change, privilege escalation, and alibi timestamp to an append-only, tamper-evident BLAKE3 arity-4 Merkle ledger (`ARGF/2`) with forward-secret `tag_commit` equality proofs.
 5. **Universal Portability via Project Treble**: Preserves device manufacturer Board Support Packages (BSPs), kernel `/boot`, and vendor drivers (`/vendor`), replacing strictly the generic system partition (`system.img`).
-6. **Isolated Android Compatibility**: Runs legacy Android applications inside an isolated Waydroid (LXC) container with hardware GPU acceleration and certified Play Integrity spoofing (`pif.json`), protecting host security.
+6. **Transitional Android Compatibility & Open Attestation**: Runs legacy Android applications inside an isolated Waydroid (LXC) container with hardware GPU acceleration. Google Play Integrity spoofing (`pif.json`) is explicitly designated as a **transitional, deprecated shim** ([PIF_ROADMAP.md](file:///home/alpha/android/mobile/waydroid/PIF_ROADMAP.md)) transitioning to open IETF RATS (RFC 9334) and EAT (RFC 9711) hardware attestation ([ATTESTATION.md](file:///home/alpha/android/ATTESTATION.md)). See the consolidated [ROADMAP.md](file:///home/alpha/android/ROADMAP.md).
 
 ---
 
@@ -154,7 +154,8 @@ All 100 automated verification gates pass with 100% success:
 | **Sensors & Camera** | [`mobile/test/test-sensors.sh`](file:///home/alpha/android/mobile/test/test-sensors.sh) | 13 tests | **100% (13/13)** | `lrd-sensord`, Linux IIO sensors, auto-rotation matrix, ear proximity screen blanking, ALS brightness, compass, haptics vibrator HAL. |
 | **Mobile Power** | [`mobile/test/test-power.sh`](file:///home/alpha/android/mobile/test/test-power.sh) | 10 tests | **100% (10/10)** | `lrd-wakelockd`, `/sys/power/wake_lock` acquisition/release, S2Idle deep sleep transitions, battery guardian 80% charge limiter, hardware IRQ wakeups. |
 | **Wayland Touch OSK** | [`mobile/test/test-osk.sh`](file:///home/alpha/android/mobile/test/test-osk.sh) | 7 tests | **100% (7/7)** | `lrd-osk` layer-shell virtual keyboard, multi-lingual layouts (QWERTY, QWERTZ, AZERTY, Numeric, Emoji), swipe gestures. |
-| **ARM Translation** | [`mobile/test/test-arm-translation.sh`](file:///home/alpha/android/mobile/test/test-arm-translation.sh) | 8 tests | **100% (8/8)** | `lrd-arm-bridge`, `lrd-pif-apply`, certified Play Integrity Fix profile (`pif.json`), microG signature spoofing, binfmt_misc hooks. |
+| **ARM Translation & Attestation** | [`mobile/test/test-arm-translation.sh`](file:///home/alpha/android/mobile/test/test-arm-translation.sh) | 9 tests | **100% (9/9)** | `lrd-arm-bridge`, `lrd-pif-apply` (`TALOS_PIF_DISABLE=1` opt-out), transitional PIF profile, ARGUS `pif_applied_transitional` event, binfmt_misc hooks. |
+| **Sovereign RATS Verifier** | [`tests/test_rats_verifier.py`](file:///home/alpha/android/tests/test_rats_verifier.py) | 7 tests | **100% (7/7)** | Pure Python stdlib RFC 9334 RATS verifier, RFC 9711 EAT parser, TPM 2.0 quote appraisal (RSA & HMAC), PCR composite digest, golden RIM checks. |
 | **ARGUS Tamper & Scope** | [`tests/argx/test_tamper.py`](file:///home/alpha/android/tests/argx/test_tamper.py) | 5 tests | **100% (5/5)** | Header corruption detection (`V-101`), tail truncation (`V-503`), scope omission detection (`V-701`), deterministic JSONL verification. |
 | **`tag_commit` Security** | [`tests/tag/test_tags.py`](file:///home/alpha/android/tests/tag/test_tags.py) | 10 tests | **100% (10/10)** | Epoch mismatch detection (`V-919`), `tag_digest` binding (`V-910`), cross-epoch bridge validation (`V-912`/`V-913`), unbridged local tag warnings (`V-918`), decoy root profile isolation. |
 | **ARGUS Ledger & Degraded**| `tests/producers/*.py` & `tests/e2e/*.py` | 29 tests | **100% (29/29)**| Ring buffer overflow drain, lifecycle records, torn write recovery, multiboot continuity, and strict exit grading. |
@@ -182,6 +183,12 @@ All development, verification, and release workflows are driven through the unif
 ```bash
 # 1. Run all 100 test gates (ARGUS cryptographic trust + 8 mobile subsystem suites + verifier)
 make check
+
+# 2. Run verification gates with transitional Play Integrity spoofing disabled
+TALOS_PIF_DISABLE=1 make check
+
+# 3. Verify open RATS attestation verifier against RFC 9334 & RFC 9711 vectors
+make test-attestation
 
 # 2. Run dual-build bit-for-bit reproducibility verification across independent paths
 make reproducible

@@ -15,25 +15,28 @@
 #define FALLBACK_SOCK "/tmp/libredroid/firewall.sock"
 
 static int connect_firewall(void) {
-    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (fd < 0) return -1;
+    for (int retry = 0; retry < 5; retry++) {
+        int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (fd < 0) return -1;
 
-    struct sockaddr_un addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, SOCK_PATH, sizeof(addr.sun_path) - 1);
+        struct sockaddr_un addr;
+        memset(&addr, 0, sizeof(addr));
+        addr.sun_family = AF_UNIX;
+        strncpy(addr.sun_path, SOCK_PATH, sizeof(addr.sun_path) - 1);
 
-    if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == 0) {
-        return fd;
+        if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == 0) {
+            return fd;
+        }
+
+        // Try fallback
+        strncpy(addr.sun_path, FALLBACK_SOCK, sizeof(addr.sun_path) - 1);
+        if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == 0) {
+            return fd;
+        }
+
+        close(fd);
+        usleep(10000);
     }
-
-    // Try fallback
-    strncpy(addr.sun_path, FALLBACK_SOCK, sizeof(addr.sun_path) - 1);
-    if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) == 0) {
-        return fd;
-    }
-
-    close(fd);
     return -1;
 }
 

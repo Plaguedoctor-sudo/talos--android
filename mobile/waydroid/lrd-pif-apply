@@ -3,8 +3,12 @@
 # LibreDroid Play Integrity Fix & microG Automator (lrd-pif-apply)
 # os/waydroid/lrd-pif-apply
 #
-# Injects certified Google device fingerprints (pif.json) into Waydroid & microG
-# to pass MEETS_BASIC_INTEGRITY and MEETS_DEVICE_INTEGRITY checks.
+# TRANSITIONAL SHIM: Injects certified Google device fingerprints (pif.json)
+# into Waydroid & microG to pass legacy basic/device integrity checks.
+# This component is deprecated and scheduled for sunset in favor of open
+# RATS (RFC 9334) attestation. See mobile/waydroid/PIF_ROADMAP.md and ATTESTATION.md.
+#
+# SPDX-License-Identifier: Apache-2.0
 # ==============================================================================
 
 set -euo pipefail
@@ -26,10 +30,31 @@ fi
 APPLY_LOG="$STATE_DIR/play_integrity.json"
 
 apply_pif() {
+    # Check if disabled via TALOS_PIF_DISABLE=1
+    if [ "${TALOS_PIF_DISABLE:-0}" = "1" ]; then
+        echo "[!] TALOS_PIF_DISABLE=1 set: Skipping transitional Play Integrity spoofing." >&2
+        cat <<EOF > "$APPLY_LOG"
+{
+  "status": "disabled",
+  "pif_applied_transitional": false,
+  "transitional": true,
+  "message": "Play Integrity spoofing skipped via TALOS_PIF_DISABLE=1",
+  "integrity_verdict": {
+    "MEETS_BASIC_INTEGRITY": false,
+    "MEETS_DEVICE_INTEGRITY": false,
+    "MEETS_STRONG_INTEGRITY": false
+  }
+}
+EOF
+        return 0
+    fi
+
+    # Emit warning on boot / invocation
+    echo "[WARN] TRANSITIONAL: Play Integrity spoofing is an untrusted shim and will be removed. See PIF_ROADMAP.md and ATTESTATION.md" >&2
     echo "[*] Injecting Play Integrity Fix into Waydroid & microG..."
 
     if [ ! -f "$PIF_JSON" ]; then
-        echo "Error: pif.json not found at $PIF_JSON"
+        echo "Error: pif.json not found at $PIF_JSON" >&2
         exit 1
     fi
 
@@ -42,6 +67,30 @@ apply_pif() {
     echo "[+] Certified Fingerprint: $fingerprint"
     echo "[+] Security Patch Level:  $security_patch"
 
+    # Emit ARGUS audit event pif_applied_transitional=true
+    echo "[ARGUS] Emitting audit event: pif_applied_transitional=true" >&2
+    python3 -c '
+import sys, os
+try:
+    from argus.ledger import Ledger
+    from argus.config import Config
+    cfg = Config()
+    cfg.init_directories()
+    ledger = Ledger(cfg.ledger_path)
+    ledger.append("pif_applied_transitional", {
+        "pif_applied_transitional": True,
+        "device_model": sys.argv[1],
+        "fingerprint": sys.argv[2],
+        "status": "transitional_applied"
+    })
+except Exception:
+    pass
+' "$model" "$fingerprint" 2>/dev/null || true
+
+    local ARGUS_EVENT_LOG="/tmp/argus/events.jsonl"
+    mkdir -p "$(dirname "$ARGUS_EVENT_LOG")" 2>/dev/null || true
+    echo "{\"event\": \"pif_applied_transitional\", \"pif_applied_transitional\": true, \"timestamp\": \"$(date -u +%FT%TZ)\", \"model\": \"$model\"}" >> "$ARGUS_EVENT_LOG" 2>/dev/null || true
+
     # Apply via waydroid prop if available
     if command -v waydroid >/dev/null 2>&1; then
         waydroid prop set ro.build.fingerprint "$fingerprint" 2>/dev/null || true
@@ -53,6 +102,8 @@ apply_pif() {
     cat <<EOF > "$APPLY_LOG"
 {
   "status": "applied",
+  "transitional": true,
+  "pif_applied_transitional": true,
   "device_model": "$model",
   "fingerprint": "$fingerprint",
   "security_patch": "$security_patch",

@@ -1,0 +1,52 @@
+{
+  "_description": "RFC 9334 EAT Token with Tampered PCR 10 (Composite Digest Mismatch)",
+  "iss": "did:talos:attester:node-01",
+  "sub": "talos-device-primary",
+  "iat": 1764072000,
+  "eat_profile": "https://talos.org/eat/v1",
+  "ueid": "7dbc3d6924a1dce0375d40372d8bd5ec5c7be835e03c9bf6a9f7b7122f92f7ad",
+  "hwmodel": "TALOS-Ref-x86_64",
+  "swname": "TALOS-LibreMobile/1.0",
+  "dbgstat": "disabled-permanently",
+  "boot_count": 42,
+  "nonce": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+  "measres": {
+    "0": "22bef1b82987863a664c68ecfc0d30f894d49787d4d18b33be932960899c5118",
+    "1": "a60f773a64389d8198dd8e0c65c302c935aa27fa70860072e126dee535ca15a3",
+    "2": "094604f417ec37e3e123006e69c9b2750889577cc45585b028c2a762f3f3b249",
+    "4": "9785147fea120c637018e46ffd77873269771130e109766ccd99edbf0ad16668",
+    "7": "eac710f10f0eb5f63f0edb3a7febbe38b599a0860a2ea97befc89c8c46c37d64",
+    "10": "0000000000000000000000000000000000000000000000000000000000000000",
+    "14": "df8ed3117d4232fea1af388cb3f94e11644b69495a6f0484d3a76bdf6c7bf042"
+  },
+  "tpm_quote": {
+    "signer_name": "talos-ref-ak-01",
+    "sig_alg": "hmac-sha256",
+    "raw_attest": "{\"clock_info\": {\"clock\": 102400, \"reset_count\": 1, \"restart_count\": 0, \"safe\": true}, \"magic\": \"ff544347\", \"nonce\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\", \"pcr_digest\": \"833ffea0e2d9dbe48ade7ec7ed1a468311ab296b1a7e090e5bb857b8968c5bd9\", \"pcr_select\": [0, 1, 2, 4, 7, 10, 14], \"type\": \"8018\"}",
+    "signature": "218b302a66153458894a8acbd3f879b47f1812b3f368f3ac30a9494e0d11f3a9",
+    "attest_data": {
+      "magic": "ff544347",
+      "type": "8018",
+      "nonce": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pcr_select": [
+        0,
+        1,
+        2,
+        4,
+        7,
+        10,
+        14
+      ],
+      "pcr_digest": "833ffea0e2d9dbe48ade7ec7ed1a468311ab296b1a7e090e5bb857b8968c5bd9",
+      "clock_info": {
+        "clock": 102400,
+        "reset_count": 1,
+        "restart_count": 0,
+        "safe": true
+      }
+    }
+  },
+  "submods": {
+    "container_mode": "waydroid_isolated"
+  }
+}

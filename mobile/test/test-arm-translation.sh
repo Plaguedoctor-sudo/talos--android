@@ -1,7 +1,9 @@
 #!/bin/bash
 # ==============================================================================
 # LibreDroid Phase 12 Automated Verification Test Suite
-# ARM64-to-x86 Binary Translation Bridge & Play Integrity Fix
+# ARM64-to-x86 Binary Translation Bridge & Play Integrity Fix (Transitional)
+#
+# SPDX-License-Identifier: Apache-2.0
 # ==============================================================================
 
 set -euo pipefail
@@ -45,6 +47,7 @@ test_pif_json() {
     python3 -c '
 import json, sys
 data = json.load(open(sys.argv[1]))
+assert data.get("_comment") == "TRANSITIONAL — see PIF_ROADMAP.md"
 assert data.get("BRAND") == "google"
 assert "FINGERPRINT" in data
 assert data["INTEGRITY"]["MEETS_BASIC_INTEGRITY"] is True
@@ -67,17 +70,48 @@ assert_ok "ARM64-to-x86 binary translation bridge provisioning & binfmt_misc hoo
 
 # Test Play Integrity Injection and Verdict
 test_pif_apply_lifecycle() {
-    local apply_out
-    apply_out=$("$PIF_APPLY" apply)
-    echo "$apply_out" | grep -q "Play Integrity Fix applied successfully"
+    if [ "${TALOS_PIF_DISABLE:-0}" = "1" ]; then
+        local apply_out
+        apply_out=$("$PIF_APPLY" apply 2>&1)
+        echo "$apply_out" | grep -q "TALOS_PIF_DISABLE=1 set: Skipping transitional Play Integrity spoofing"
+
+        local status_out
+        status_out=$("$PIF_APPLY" status)
+        echo "$status_out" | grep -q '"status": "disabled"'
+        echo "$status_out" | grep -q '"pif_applied_transitional": false'
+    else
+        local apply_out
+        apply_out=$("$PIF_APPLY" apply 2>&1)
+        echo "$apply_out" | grep -q "Play Integrity Fix applied successfully"
+        echo "$apply_out" | grep -q "pif_applied_transitional=true"
+
+        local status_out
+        status_out=$("$PIF_APPLY" status)
+        echo "$status_out" | grep -q '"MEETS_BASIC_INTEGRITY": true'
+        echo "$status_out" | grep -q '"MEETS_DEVICE_INTEGRITY": true'
+        echo "$status_out" | grep -q '"signature_spoofing": "enabled"'
+        echo "$status_out" | grep -q '"pif_applied_transitional": true'
+    fi
+}
+assert_ok "Play Integrity Fix injection & microG signature spoofing validation" test_pif_apply_lifecycle
+
+# Test Play Integrity disable override via TALOS_PIF_DISABLE=1
+test_pif_disable_override() {
+    local out
+    out=$(TALOS_PIF_DISABLE=1 "$PIF_APPLY" apply 2>&1)
+    echo "$out" | grep -q "TALOS_PIF_DISABLE=1 set: Skipping transitional Play Integrity spoofing"
 
     local status_out
     status_out=$("$PIF_APPLY" status)
-    echo "$status_out" | grep -q '"MEETS_BASIC_INTEGRITY": true'
-    echo "$status_out" | grep -q '"MEETS_DEVICE_INTEGRITY": true'
-    echo "$status_out" | grep -q '"signature_spoofing": "enabled"'
+    echo "$status_out" | grep -q '"status": "disabled"'
+    echo "$status_out" | grep -q '"pif_applied_transitional": false'
+
+    # Restore default active state if we are in normal test mode
+    if [ "${TALOS_PIF_DISABLE:-0}" != "1" ]; then
+        "$PIF_APPLY" apply >/dev/null 2>&1
+    fi
 }
-assert_ok "Play Integrity Fix injection & microG signature spoofing validation" test_pif_apply_lifecycle
+assert_ok "Play Integrity Fix disable override via TALOS_PIF_DISABLE=1" test_pif_disable_override
 
 echo "=========================================================="
 echo "Phase 12 Test Results: $PASSED passed, $FAILED failed."

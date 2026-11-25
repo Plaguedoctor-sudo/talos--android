@@ -454,6 +454,18 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
   - [`tests/test_audit_vectors.py`](file:///home/alpha/android/tests/test_audit_vectors.py): Automated regression test asserting all committed static vectors pass invariant checks.
   - Driven by `make audit-prep`.
 
+#### 1.5. Sovereign Remote Attestation & PIF Sunset (`ATTESTATION.md`, `ROADMAP.md`, `attestation/rats-verifier`)
+- **[ATTESTATION.md](file:///home/alpha/android/ATTESTATION.md)**: Open Remote Attestation specification implementing IETF RATS (RFC 9334) architecture and EAT (RFC 9711) tokens. Covers Passport and Background-Check models, TPM 2.0 PCR allocation, zero-dependency local verifier design, remote verifier federation, app developer outreach tracks (native Linux, sandboxed PWA with WebAuthn/FIDO2, open Android attestation HAL), and migration phases.
+- **[ROADMAP.md](file:///home/alpha/android/ROADMAP.md)**: Consolidated master roadmap documenting completed milestones (Phases 1–5), active attestation transition (Phase 6), and 2027–2028 forward horizons (Post-Quantum ARGF/2, Librem 5 v2 RISC-V silicon, distributed ledger mesh).
+- **[mobile/waydroid/PIF_ROADMAP.md](file:///home/alpha/android/mobile/waydroid/PIF_ROADMAP.md)**: Formal status declaration (`TRANSITIONAL`), legal/technical risk analysis, measurable exit criteria ($\ge 3$ banking apps, $\ge 5$ public ID portals, mandatory hardware KeyMint enforcement, Dec 31, 2027 hard cutoff).
+- **[attestation/rats-verifier/](file:///home/alpha/android/attestation/rats-verifier)**: Pure Python 3 stdlib reference verifier engine:
+  - `eat.py`: RFC 9711 Entity Attestation Token parser and validator.
+  - `tpm.py`: TPM 2.0 quote appraisal (`TPMS_ATTEST` and `TPMT_SIGNATURE`), composite PCR digest calculation, pure stdlib RSA-PKCS1-v1.5 and HMAC-SHA256 signature verification.
+  - `verifier.py`: Core appraisal engine comparing evidence against pinned Attestation Keys (AKs) and Reference Integrity Measurements (RIM), emitting standardized Trustworthiness Vectors.
+  - `cli.py`: Command-line interface for local and container attestation queries.
+  - `vectors/`: Committed static JSON test vectors for valid, tampered PCR, expired nonce, and untrusted AK scenarios.
+  - Tested by `tests/test_rats_verifier.py` (`make test-attestation`).
+
 #### 2. Cellular Telephony Subsystem (`mobile/telephony/`)
 - **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)** (13,125 B | 357 lines)
   - *Aim:* Native C telephony daemon (`< 2 MB` RSS). Connects to Qualcomm/MediaTek baseband via ModemManager / `mmcli`, controls SIM state, routes VoLTE/VoNR audio streams, handles SMS lifecycle, and exposes `/run/libredroid/telephony.sock`.
@@ -539,10 +551,12 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
 #### 10. Android App LXC Container (`mobile/waydroid/`)
 - **[lrd-arm-bridge](file:///home/alpha/android/mobile/waydroid/lrd-arm-bridge)** (4,150 B | 130 lines)
   - *Aim:* Manages `binfmt_misc` ARM-to-x86_64 translation bridge (Houdini/libndk) inside Waydroid.
-- **[pif.json](file:///home/alpha/android/mobile/waydroid/pif.json)** (467 B | 18 lines)
-  - *Aim:* Certified Pixel 8 Pro fingerprint profile for Google Play Integrity / SafetyNet spoofing.
-- **[lrd-pif-apply](file:///home/alpha/android/mobile/waydroid/lrd-pif-apply)** (2,833 B | 91 lines)
-  - *Aim:* Injects `pif.json` into container system properties on boot.
+- **[pif.json](file:///home/alpha/android/mobile/waydroid/pif.json)**
+  - *Aim:* `TRANSITIONAL` legacy fingerprint profile for temporary Play Integrity spoofing. Carries top-level deprecation comment; slated for hard removal by Dec 31, 2027.
+- **[lrd-pif-apply](file:///home/alpha/android/mobile/waydroid/lrd-pif-apply)**
+  - *Aim:* Transitional shim that injects `pif.json` into container system properties on boot. Outputs deprecation warning to `stderr`, emits append-only ARGUS audit event `pif_applied_transitional=true`, and respects `TALOS_PIF_DISABLE=1` to skip spoofing.
+- **[PIF_ROADMAP.md](file:///home/alpha/android/mobile/waydroid/PIF_ROADMAP.md)**
+  - *Aim:* Authoritative Play Integrity sunset roadmap with measurable exit criteria and dated migration phases.
 - **[lrd-waydroid-freezer](file:///home/alpha/android/mobile/waydroid/lrd-waydroid-freezer)** (6,038 B | 156 lines)
   - *Aim:* cgroup v2 container freezer that halts background Android app drain when the screen is locked.
 - **[lrd-waydroid-domain.sh](file:///home/alpha/android/mobile/waydroid/lrd-waydroid-domain.sh)** (6,501 B | 183 lines)

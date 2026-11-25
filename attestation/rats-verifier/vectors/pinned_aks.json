@@ -1,0 +1,6 @@
+{
+  "talos-ref-ak-01": {
+    "type": "hmac-sha256",
+    "secret": "talos_sovereign_ak_test_secret_001"
+  }
+}
