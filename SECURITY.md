@@ -118,6 +118,10 @@ We recognize and reward security researchers who help protect TALOS users. Rewar
    - History rewrite script prepared (`scripts/rewrite-history-for-key-removal.sh`) using `git filter-repo`.
    - Pre-commit key guard enacted (`scripts/pre-commit-key-guard.sh`) blocking secret key extensions.
    - Pinned public key verification fails closed in `store/verify-index.sh` if release key is unpinned.
+4. **2026-11-25 17:30:55 UTC:** History rewritten at 2026-11-25 17:30:55 UTC. All forks, clones, and caches created before this timestamp may contain the compromised key and MUST be considered unsafe. Fork owners are asked to delete and re-fork.
+
+#### Residual exposure after history rewrite
+GitHub forks, CI caches, and third-party mirrors created before the rewrite may still retain the compromised key material in unpruned Git loose objects or cached refs. For this reason, history rewrite is necessary but not sufficient: the only safe remediation is permanent key rotation and untrusting the compromised fingerprint (as enforced by `store/POLICY.md` and `store/verify-index.sh`). Any store index signed with fingerprint `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391` is permanently rejected.
 
 #### Client-Side Impact & Advisory
 - No TALOS production client should ever have trusted this key.

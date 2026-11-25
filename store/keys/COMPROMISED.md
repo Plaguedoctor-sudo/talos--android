@@ -12,3 +12,8 @@ The Ed25519 key with fingerprint d990d9b364f780f4350030968fde559414f0b275e353eb4
 - **Compromised Fingerprint:** `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391`
 - **Initial Commit:** `82ce129` (`feat(store): implement antimonopoly F-Droid distribution layer with deterministic privacy scores`)
 - **Remediation Status:** Purged from working tree, `.gitignore` guard enacted, `fingerprint.txt` revoked to `UNPINNED`, safe offline provisioning script provided.
+
+### Status: history rewritten, key rotated, remaining exposure: forks/mirrors
+- **History Rewrite Executed:** `2026-11-25 17:30:55 UTC`
+- **Key Status:** Rotated / Revoked. Repository index is UNPINNED until operator provisions release key outside repo.
+- **Remaining Exposure:** Any third-party fork or mirror cloned prior to `2026-11-25 17:30:55 UTC` may still retain the exposed key object. Downstream consumers must delete forks and re-clone from `main`.
