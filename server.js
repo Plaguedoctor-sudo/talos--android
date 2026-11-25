@@ -333,8 +333,21 @@ const server = http.createServer((req, res) => {
 
     try {
       const data = fs.readFileSync(indexPath, 'utf-8');
+      const parsed = JSON.parse(data);
+      const isSigned = parsed.signed === true;
+      const apps = parsed.packages || parsed.apps || [];
+      const responsePayload = {
+        signed: isSigned,
+        apps: apps,
+        packages: apps,
+        repo: parsed.repo || {},
+        score_metadata: parsed.score_metadata || {}
+      };
+      if (!isSigned) {
+        responsePayload.warning = 'Store index is UNSIGNED. Operator must provision a release key per store/POLICY.md.';
+      }
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(data);
+      return res.end(JSON.stringify(responsePayload));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ ok: false, error: e.message }));

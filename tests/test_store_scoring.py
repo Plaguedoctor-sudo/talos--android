@@ -133,20 +133,60 @@ def test_score_determinism(trackers_db, upstream_index):
     assert json_a == json_b
 
 
-def test_signature_verification_gate():
-    """Verify index detached Ed25519 signature against pinned key and reject tampering."""
-    from store.sign_index import verify_index  # type: ignore
+def test_signature_verification_gate(tmp_path):
+    """Verify index detached Ed25519 signature validation and tampering detection using ephemeral test keys."""
+    from store.sign_index import keygen, sign_index, verify_index  # type: ignore
+
+    test_sec = tmp_path / "test.sec"
+    keygen(test_sec)
+    test_pub = tmp_path / "test.pub"
+    assert test_sec.is_file()
+    assert test_pub.is_file()
 
     index_file = INDEX_DIR / "index.json"
-    sig_file = INDEX_DIR / "index.json.sig"
-    pubkey_file = KEYS_DIR / "fdroid-signing.pub"
-
     assert index_file.is_file(), "index.json must exist"
-    assert sig_file.is_file(), "index.json.sig must exist"
-    assert pubkey_file.is_file(), "fdroid-signing.pub must exist"
 
-    # Signature must be valid for unmodified index
-    assert verify_index(index_file, sig_file, pubkey_file) is True
+    test_sig = tmp_path / "index.json.sig"
+    sign_index(index_file, test_sec, test_sig)
+    assert test_sig.is_file()
+
+    # Valid signature must verify cleanly
+    assert verify_index(index_file, test_sig, test_pub) is True
+
+    # Tampered signature must be rejected
+    tampered_sig = tmp_path / "tampered.sig"
+    tampered_sig.write_text("00" * 64 + "\n")
+    assert verify_index(index_file, tampered_sig, test_pub) is False
+
+
+def test_unsigned_graceful_degradation():
+    """When fingerprint is UNPINNED, build produces signed: false, verify exits 1, and UI path is graceful."""
+    import subprocess
+
+    fingerprint_file = KEYS_DIR / "fingerprint.txt"
+    assert fingerprint_file.is_file()
+    content = fingerprint_file.read_text("utf-8").strip()
+    assert "UNPINNED" in content
+
+    # 1. verify-index.sh must refuse and exit 1
+    res_verify = subprocess.run(["./store/verify-index.sh"], capture_output=True, text=True)
+    assert res_verify.returncode == 1
+    assert "release key not provisioned" in res_verify.stderr or "Refusing to verify" in res_verify.stdout or "Refusing to verify" in res_verify.stderr
+
+    # 2. index.json must report signed: false
+    index_file = INDEX_DIR / "index.json"
+    with open(index_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert data.get("signed") is False
+    assert data.get("signature") is None
+
+    # 3. UI app.js contains graceful unsigned handling (red banner, unverified badge, disabled install)
+    app_js = Path(__file__).parent.parent / "dist" / "assets" / "app.js"
+    assert app_js.is_file()
+    js_text = app_js.read_text("utf-8")
+    assert "Store index is UNSIGNED" in js_text
+    assert "Score: unverified" in js_text
+    assert "Install disabled until index is signed" in js_text
 
 
 def test_server_store_endpoint():

@@ -47,12 +47,28 @@
         throw new Error('HTTP ' + resp.status + ': ' + resp.statusText);
       }
       const data = await resp.json();
-      const pkgs = data.packages || [];
+      const isSigned = data.signed !== false;
+      const metaBar = document.getElementById('store-meta-bar');
+      if (metaBar) {
+        if (!isSigned) {
+          metaBar.innerHTML = '<span class="meta-pill" style="background:var(--danger, #dc2626); color:#fff;">⚠️ Unsigned Index</span><span class="meta-pill">Scorer v1.0.0</span>';
+        } else {
+          metaBar.innerHTML = '<span class="meta-pill">Ed25519 Signed</span><span class="meta-pill">Scorer v1.0.0</span>';
+        }
+      }
+
+      const pkgs = data.apps || data.packages || [];
       if (pkgs.length === 0) {
         listEl.innerHTML = '<div class="store-loading">No packages available in repository index.</div>';
         return;
       }
-      listEl.innerHTML = pkgs.map(pkg => {
+
+      let bannerHtml = '';
+      if (!isSigned) {
+        bannerHtml = '<div class="store-unsigned-banner" style="background:#dc2626; color:#ffffff; padding:12px; border-radius:6px; margin-bottom:16px; font-weight:bold;">⚠️ Store index is UNSIGNED. Operator must provision a release key per store/POLICY.md.</div>';
+      }
+
+      const itemsHtml = pkgs.map(pkg => {
         const score = pkg.privacy_score || {};
         const grade = score.grade || 'N/A';
         const total = score.total_score != null ? score.total_score : '--';
@@ -65,6 +81,14 @@
         const trackerClass = trackerCount === 0 ? 'badge-tracker' : 'badge-tracker-warn';
         const trackerText = trackerCount === 0 ? '✔ 0 Trackers' : ('⚠ ' + trackerCount + ' Trackers');
 
+        const scoreBadge = (!isSigned)
+          ? '<span class="badge" style="background:#f59e0b; color:#000;">Score: unverified</span>'
+          : '<span class="badge ' + gradeClass + '">' + grade + ' (' + total + '/100)</span>';
+
+        const installBtn = (!isSigned)
+          ? '<button class="btn-store-install" disabled title="Install disabled until index is signed" style="opacity:0.5; cursor:not-allowed;">Install</button>'
+          : '<button class="btn-store-install">Install</button>';
+
         return [
           '<div class="store-card" data-package-id="' + pkg.id + '">',
           '  <div class="store-card-header">',
@@ -72,7 +96,7 @@
           '      <div class="store-pkg-name">' + pkg.name + '</div>',
           '      <div class="store-pkg-id">' + pkg.id + ' • v' + (pkg.version_name || '') + '</div>',
           '    </div>',
-          '    <span class="badge ' + gradeClass + '">' + grade + ' (' + total + '/100)</span>',
+          '    ' + scoreBadge,
           '  </div>',
           '  <div class="store-pkg-summary">' + (pkg.summary || '') + '</div>',
           '  <div class="store-badges">',
@@ -81,11 +105,14 @@
           '    <span class="badge badge-egress">🛡️ ' + egress + '</span>',
           '    <span class="badge badge-egress">📜 ' + (pkg.license || 'FOSS') + '</span>',
           '  </div>',
+          '  <div class="store-card-actions" style="margin-top:10px; display:flex; justify-content:flex-end;">',
+          '    ' + installBtn,
+          '  </div>',
           '</div>'
-        ].join('
-');
-      }).join('
-');
+        ].join('\n');
+      }).join('\n');
+
+      listEl.innerHTML = bannerHtml + itemsHtml;
     } catch (err) {
       listEl.innerHTML = '<div class="store-loading" style="color:var(--danger)">Failed to load store index: ' + err.message + '</div>';
     }
