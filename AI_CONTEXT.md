@@ -434,6 +434,12 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
 - **[TRADEMARK.md](file:///home/alpha/android/TRADEMARK.md)**: Trademark usage rules, permitted nominative fair use, and mandatory fork renaming rules.
 - **[REUSE.toml](file:///home/alpha/android/REUSE.toml)**: Free Software Foundation Europe REUSE 3.0 license and copyright attribution specification.
 
+#### 1.3. Tiered Hardware Certification Matrix (`hardware/` & `HARDWARE.md`)
+- **[HARDWARE.md](file:///home/alpha/android/HARDWARE.md)**: Human-readable hardware certification document defining Tier A (Fully Free), Tier B (Blob-Reduced), Tier C (Treble-Compatible / Sovereign userspace, non-free firmware), and Roadmap tiers.
+- **[hardware/schema.json](file:///home/alpha/android/hardware/schema.json)**: JSON Schema (draft 2020-12) validating machine-readable hardware matrix entries and blob inventories.
+- **[hardware/matrix.yaml](file:///home/alpha/android/hardware/matrix.yaml)**: Machine-readable database of tested devices, SoC details, bootloader relocking support, kill-switch status, firmware provenance, and binary blob catalogs.
+- **[scripts/hardware-matrix.py](file:///home/alpha/android/scripts/hardware-matrix.py)**: Python stdlib validator enforcing schema rules, tier consistency (prohibiting proprietary blobs in Tier A), and deterministic idempotent Markdown rendering. Driven by `make hardware-matrix-check` and `make hardware-matrix-render`.
+
 #### 2. Cellular Telephony Subsystem (`mobile/telephony/`)
 - **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)** (13,125 B | 357 lines)
   - *Aim:* Native C telephony daemon (`< 2 MB` RSS). Connects to Qualcomm/MediaTek baseband via ModemManager / `mmcli`, controls SIM state, routes VoLTE/VoNR audio streams, handles SMS lifecycle, and exposes `/run/libredroid/telephony.sock`.

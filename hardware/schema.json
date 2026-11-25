@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://talos-os.org/schemas/hardware-matrix.schema.json",
+  "title": "TALOS Hardware Matrix Certification Schema",
+  "description": "JSON Schema draft 2020-12 defining the hardware certification matrix for TALOS / LibreMobile OS.",
+  "type": "object",
+  "required": ["version", "devices"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Matrix specification version."
+    },
+    "devices": {
+      "type": "array",
+      "description": "List of evaluated hardware devices.",
+      "items": {
+        "$ref": "#/$defs/device_entry"
+      }
+    }
+  },
+  "$defs": {
+    "device_entry": {
+      "type": "object",
+      "required": [
+        "vendor",
+        "model",
+        "soc",
+        "bootloader_unlock",
+        "bootloader_relock",
+        "kill_switches",
+        "modem",
+        "modem_firmware_status",
+        "wifi_bt_firmware_status",
+        "gpu_firmware_status",
+        "camera_firmware_status",
+        "blob_inventory",
+        "treble_compatible",
+        "talos_support_level"
+      ],
+      "properties": {
+        "vendor": {
+          "type": "string",
+          "description": "Hardware manufacturer or integrator."
+        },
+        "model": {
+          "type": "string",
+          "description": "Commercial model name or hardware codename."
+        },
+        "soc": {
+          "type": "string",
+          "description": "System on Chip identifier and architecture."
+        },
+        "bootloader_unlock": {
+          "type": "boolean",
+          "description": "Whether the device bootloader can be unlocked without manufacturer authorization."
+        },
+        "bootloader_relock": {
+          "type": "boolean",
+          "description": "Whether the bootloader can be re-locked with custom user-enrolled root-of-trust keys."
+        },
+        "kill_switches": {
+          "type": "object",
+          "description": "Hardware physical cut-off switches for sensitive peripherals.",
+          "required": ["mic", "camera", "radio"],
+          "properties": {
+            "mic": {
+              "type": "boolean",
+              "description": "Physical hardware cut-off switch for microphone circuit."
+            },
+            "camera": {
+              "type": "boolean",
+              "description": "Physical hardware cut-off switch for camera sensors."
+            },
+            "radio": {
+              "type": "boolean",
+              "description": "Physical hardware cut-off switch for cellular/Wi-Fi/Bluetooth RF radios."
+            }
+          },
+          "additionalProperties": false
+        },
+        "modem": {
+          "type": "string",
+          "description": "Cellular baseband modem hardware model."
+        },
+        "modem_firmware_status": {
+          "type": "string",
+          "enum": ["free", "proprietary_signed", "proprietary_unsigned", "replaced"],
+          "description": "Firmware audit status of the cellular baseband modem."
+        },
+        "wifi_bt_firmware_status": {
+          "type": "string",
+          "enum": ["free", "proprietary_signed", "proprietary_unsigned", "replaced"],
+          "description": "Firmware audit status of the Wi-Fi and Bluetooth controllers."
+        },
+        "gpu_firmware_status": {
+          "type": "string",
+          "enum": ["free", "proprietary_signed", "proprietary_unsigned", "replaced"],
+          "description": "Firmware audit status of the graphics processing unit."
+        },
+        "camera_firmware_status": {
+          "type": "string",
+          "enum": ["free", "proprietary_signed", "proprietary_unsigned", "replaced"],
+          "description": "Firmware audit status of the image signal processor (ISP) and camera subsystem."
+        },
+        "blob_inventory": {
+          "type": "array",
+          "description": "Inventory of closed-source blobs required for device boot or functionality.",
+          "items": {
+            "type": "object",
+            "required": ["component", "license", "source", "replaceable_by_librephone"],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "Subsystem component name or firmware binary."
+              },
+              "license": {
+                "type": "string",
+                "description": "License governing the binary blob."
+              },
+              "source": {
+                "type": "string",
+                "description": "Origin repository, vendor partition, or package source."
+              },
+              "replaceable_by_librephone": {
+                "type": "boolean",
+                "description": "Whether Librephone / community reverse-engineering can replace this blob."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "treble_compatible": {
+          "type": "boolean",
+          "description": "Whether the device supports Project Treble GSI system.img replacement."
+        },
+        "talos_support_level": {
+          "type": "string",
+          "enum": ["Tier A", "Tier B", "Tier C", "Roadmap"],
+          "description": "Formal TALOS support tier: Tier A (Fully Free), Tier B (Blob-Reduced), Tier C (Treble-Compatible), or Roadmap."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Operational notes, verified quirks, or TODO(operator) items."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

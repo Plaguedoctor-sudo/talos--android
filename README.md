@@ -10,10 +10,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 [![REUSE Status](https://img.shields.io/badge/REUSE-compliant-blue.svg)](REUSE.toml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-orange.svg)](LICENSES/GPL-3.0-or-later.txt)
 [![Governance: Sovereign Commons](https://img.shields.io/badge/governance-antimonopoly%20commons-purple.svg)](GOVERNANCE.md)
-[![Target Platform](https://img.shields.io/badge/target-ARM64--v8a%20Treble%20A%2FB-red.svg)](#4-hardware-compatibility-matrix)
+[![Target Platform](https://img.shields.io/badge/target-ARM64--v8a%20Treble%20A%2FB-red.svg)](HARDWARE.md)
+[![Hardware Matrix](https://img.shields.io/badge/hardware-tiered%20certification-blue.svg)](HARDWARE.md)
 
-> **Target Platform:** ARM64-v8a Smartphones and Tablets (Project Treble A/B Devices)  
-> **Supported SoCs:** Qualcomm Snapdragon (845 through 8 Gen 1/2/3), MediaTek Dimensity & Helio (G99/MT6789), Samsung Exynos (1330/1380), Google Tensor (G1/G2/G3)  
+> **Target Platform:** ARM64-v8a Smartphones and Tablets (Project Treble A/B Devices & Native Linux Phones)  
+> **Hardware Certification:** [HARDWARE.md](file:///home/alpha/android/HARDWARE.md) | [hardware/matrix.yaml](file:///home/alpha/android/hardware/matrix.yaml)  
 > **Architecture:** Pure GNU/Linux userspace over Treble Vendor HALs, GKI Kernels, and the ARGUS Cryptographic Trust Spine  
 > **Repository:** `/home/alpha/android`  
 > **AI & Agent Technical Manual:** [AI_CONTEXT.md](file:///home/alpha/android/AI_CONTEXT.md)  
@@ -113,17 +114,28 @@ TALOS / LibreMobile OS is an open-source, bit-for-bit reproducible mobile operat
 
 ---
 
-## 4. Hardware Compatibility Matrix
+## 4. Hardware Certification & Support Matrix
 
-| SoC Family | Representative Devices | Treble GSI Status | Mainline Linux Status | Recommended Installation Path |
-| :--- | :--- | :--- | :--- | :--- |
-| **Qualcomm Snapdragon 845** | OnePlus 6/6T, Poco F1, Pixel 3 | **10/10 (Flawless)** | **10/10 (Upstream)** | Native GSI or postmarketOS |
-| **Qualcomm Snapdragon 855/865** | OnePlus 7T/8T, Galaxy S20 FE | **10/10 (Flawless)** | **8/10 (Freedreno OK)** | Treble GSI (`fastboot flash system`) |
-| **Qualcomm Snapdragon 888 / 8 Gen 1/2/3** | Pixel, Galaxy S23/S24, Xiaomi 13 | **9/10 (Dynamic super)** | **5/10 (WIP)** | Fastbootd dynamic partition flash |
-| **MediaTek Helio G99 / MT6789** | OnePlus Pad Go, Redmi Note 12 | **8/10 (Fastbootd)** | **3/10 (Vendor BSP)** | Treble GSI with vendor HAL |
-| **MediaTek Dimensity 9000** | OnePlus Pad (ovaltine) | **7/10 (Vendor BSP)** | **2/10 (Needs DTS)** | Halium / Droidian or Treble |
-| **Samsung Exynos 1330/1380** | Galaxy M14 5G, Galaxy A54 | **8/10 (Fastbootd)** | **4/10 (Vendor BSP)** | Treble GSI |
-| **Google Tensor G1/G2/G3** | Pixel 6, Pixel 7, Pixel 8 | **9/10 (AVB unlock)** | **6/10 (Upstream WIP)** | Treble GSI + disabled vbmeta |
+TALOS replaces implicit or overbroad hardware compatibility claims with an honest, machine-verifiable, tiered certification matrix. Full per-device firmware audits, proprietary blob inventories, and verified boot relocking criteria are published in **[HARDWARE.md](file:///home/alpha/android/HARDWARE.md)** and strictly validated against **[hardware/schema.json](file:///home/alpha/android/hardware/schema.json)** via `make hardware-matrix-check`.
+
+### Certification Tiers
+- **Tier A (Fully Free):** Zero proprietary firmware across all active silicon components (modem baseband, Wi-Fi/BT, GPU, camera ISP). *Note: No commercial smartphone currently meets Tier A standards due to cellular baseband and Wi-Fi PHY closed-source firmware requirements.*
+- **Tier B (Blob-Reduced):** Mainline Linux kernel; proprietary blobs remain only where community reverse-engineering (e.g. Librephone) has not yet replaced them; physically isolated on USB/PCIe buses with physical hardware kill-switches.
+- **Tier C (Treble-Compatible — Sovereign Userspace, Non-Free Firmware):** Runs the sovereign TALOS userspace, defense-grade firewall, and ARGUS custody spine, but retains vendor Board Support Package (BSP) firmware blobs via Project Treble interfaces.
+- **Roadmap:** Forward-looking architectural targets (e.g. open RISC-V mobile silicon).
+
+| Tier | Vendor & Model | SoC Architecture | Boot Unlock | Relock (AVB) | Treble GSI | Kill-Switches | Blobs |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Tier B** | PINE64 PinePhone | Allwinner A64 | ✔ Yes | ✖ No | — Native | ✔ Hardware | 2 blobs |
+| **Tier B** | PINE64 PinePhone Pro | Rockchip RK3399S | ✔ Yes | ✖ No | — Native | ✔ Hardware | 2 blobs |
+| **Tier B** | Purism Librem 5 | NXP i.MX 8M Quad | ✔ Yes | ✖ No | — Native | ✔ Hardware | 3 blobs |
+| **Tier C** | Volla Phone 22 (Waydroid Ref) | MediaTek Helio G85 | ✔ Yes | ✖ No | ✔ Yes | ✖ None | 4 blobs |
+| **Tier C** | Google Pixel 6 | Google Tensor (GS101) | ✔ Yes | ✔ Yes | ✔ Yes | ✖ None | 5 blobs |
+| **Tier C** | Fairphone 4 5G | Snapdragon 750G | ✔ Yes | ✔ Yes | ✔ Yes | ✖ None | 4 blobs |
+| **Tier C** | Xiaomi POCO F3 | Snapdragon 870 | ✔ Yes | ✖ No | ✔ Yes | ✖ None | 4 blobs |
+| **Roadmap** | Purism Librem 5 v2 (RISC-V) | RISC-V Mobile SoC | ✔ Yes | ✖ No | — Native | ✔ Hardware | Eval |
+
+See **[HARDWARE.md](file:///home/alpha/android/HARDWARE.md)** for full binary blob inventories, firmware provenance, and third-party rebuild/validation instructions.
 
 ---
 

@@ -36,6 +36,7 @@ Every component in the repository has designated primary maintainers responsible
 | **System Bridge** | [`server.js`](file:///home/alpha/android/server.js) & [`build.js`](file:///home/alpha/android/build.js) | Hardened loopback bridge (`127.0.0.1:3001`), bearer auth, asset pipeline | TALOS Core Team <!-- TODO(operator): primary bridge maintainer --> |
 | **Reproducible Builds**| [`repro/`](file:///home/alpha/android/repro), [`flake.nix`](file:///home/alpha/android/flake.nix), [`.github/workflows/`](file:///home/alpha/android/.github/workflows) | Bit-for-bit compiler flags, attestation engine, Nix flake, CI matrix | TALOS Reproducibility Lead <!-- TODO(operator): primary repro lead --> |
 | **Mobile Test Harness**| [`mobile/test/`](file:///home/alpha/android/mobile/test) & [`tests/`](file:///home/alpha/android/tests) | 85-test mobile test suite, 44-test ARGUS trust suite | TALOS QA WG <!-- TODO(operator): primary test lead --> |
+| **Hardware Matrix & Tiers**| [`hardware/`](file:///home/alpha/android/hardware), [`HARDWARE.md`](file:///home/alpha/android/HARDWARE.md), [`scripts/hardware-matrix.py`](file:///home/alpha/android/scripts/hardware-matrix.py) | Tiered device schema, matrix.yaml, firmware audit, blob inventories | TALOS Hardware WG <!-- TODO(operator): primary hardware cert maintainer --> |
 
 ---
 

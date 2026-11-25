@@ -1,0 +1,270 @@
+# SPDX-FileCopyrightText: 2026 TALOS / LibreMobile OS Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+version: "1.0.0"
+
+devices:
+  # ----------------------------------------------------------------------
+  # Tier B: Blob-Reduced Sovereign Hardware
+  # ----------------------------------------------------------------------
+  - vendor: "PINE64"
+    model: "PinePhone"
+    soc: "Allwinner A64 (Quad-core ARM Cortex-A53)"
+    bootloader_unlock: true
+    bootloader_relock: false
+    kill_switches:
+      mic: true
+      camera: true
+      radio: true
+    modem: "Quectel EG25-G (LTE Cat-4)"
+    modem_firmware_status: "replaced"
+    wifi_bt_firmware_status: "proprietary_signed"
+    gpu_firmware_status: "free"
+    camera_firmware_status: "free"
+    blob_inventory:
+      - component: "Realtek RTL8723CS Wi-Fi/Bluetooth Firmware"
+        license: "Proprietary Realtek"
+        source: "linux-firmware / rtl_bt/rtl8723cs_xx.bin"
+        replaceable_by_librephone: true
+      - component: "Quectel EG25-G Hexagon DSP Baseband Blob"
+        license: "Proprietary Qualcomm Hexagon"
+        source: "Quectel Stock Firmware (isolated via USB)"
+        replaceable_by_librephone: false
+    treble_compatible: false
+    talos_support_level: "Tier B"
+    notes: "Hardware DIP kill-switches on rear chassis. Runs mainline Linux kernel with open-source Lima GPU driver. Modem userspace replaced with Biktor open-source firmware, though isolated Hexagon DSP blob remains."
+
+  - vendor: "PINE64"
+    model: "PinePhone Pro"
+    soc: "Rockchip RK3399S (Hexa-core 2x A72 + 4x A53)"
+    bootloader_unlock: true
+    bootloader_relock: false
+    kill_switches:
+      mic: true
+      camera: true
+      radio: true
+    modem: "Quectel EG25-G (LTE Cat-4)"
+    modem_firmware_status: "replaced"
+    wifi_bt_firmware_status: "proprietary_signed"
+    gpu_firmware_status: "free"
+    camera_firmware_status: "free"
+    blob_inventory:
+      - component: "Broadcom/Cypress BCM43455 Wi-Fi/BT Firmware"
+        license: "Proprietary Cypress"
+        source: "linux-firmware / brcm/brcmfmac43455-sdio.bin"
+        replaceable_by_librephone: true
+      - component: "Quectel EG25-G Hexagon DSP Baseband Blob"
+        license: "Proprietary Qualcomm Hexagon"
+        source: "Quectel Stock Firmware (isolated via USB)"
+        replaceable_by_librephone: false
+    treble_compatible: false
+    talos_support_level: "Tier B"
+    notes: "Mainline Linux kernel with open Panfrost Mali-T860 GPU driver and rkisp1 camera pipeline. Hardware kill switches for modem, Wi-Fi, mic, and cameras."
+
+  - vendor: "Purism"
+    model: "Librem 5"
+    soc: "NXP i.MX 8M Quad (Quad-core ARM Cortex-A53)"
+    bootloader_unlock: true
+    bootloader_relock: false
+    kill_switches:
+      mic: true
+      camera: true
+      radio: true
+    modem: "Broadmobi BM818 / Gemalto PLS8-E (M.2 card over USB)"
+    modem_firmware_status: "proprietary_signed"
+    wifi_bt_firmware_status: "proprietary_signed"
+    gpu_firmware_status: "free"
+    camera_firmware_status: "free"
+    blob_inventory:
+      - component: "Redpine Signals RS9116 / SparkLAN Wi-Fi/BT Firmware"
+        license: "Proprietary Redpine Signals"
+        source: "linux-firmware / rsi_91x.fw"
+        replaceable_by_librephone: true
+      - component: "Broadmobi BM818 / Gemalto PLS8 Baseband Firmware"
+        license: "Proprietary Qualcomm/Gemalto"
+        source: "M.2 Modem Module (isolated via USB)"
+        replaceable_by_librephone: false
+      - component: "NXP DDR PHY Memory Training Firmware"
+        license: "Proprietary NXP"
+        source: "imx-atf / ddr-phy"
+        replaceable_by_librephone: false
+    treble_compatible: false
+    talos_support_level: "Tier B"
+    notes: "Hardware slide switches for Cellular, Wi-Fi/Bluetooth, and Camera/Microphone. Free Etnaviv GPU userspace driver. All cellular traffic physically isolated on USB."
+
+  # ----------------------------------------------------------------------
+  # Roadmap: Future Architecture & Silicon
+  # ----------------------------------------------------------------------
+  - vendor: "Purism"
+    model: "Librem 5 v2 (RISC-V)"
+    soc: "TODO(operator): Target RISC-V 64-bit Mobile SoC (e.g. StarFive JH7110 or T-Head derivative)"
+    bootloader_unlock: true
+    bootloader_relock: false
+    kill_switches:
+      mic: true
+      camera: true
+      radio: true
+    modem: "TODO(operator): Modular M.2 Open-Firmware Modem candidate"
+    modem_firmware_status: "replaced"
+    wifi_bt_firmware_status: "replaced"
+    gpu_firmware_status: "free"
+    camera_firmware_status: "free"
+    blob_inventory:
+      - component: "TODO(operator): Target Open-Silicon Baseband DSP or COTS M.2 Module"
+        license: "TODO(operator): Pending hardware partner evaluation"
+        source: "TODO(operator): Upstream vendor specification"
+        replaceable_by_librephone: true
+      - component: "TODO(operator): Open SBI / U-Boot SPL bootloader payload"
+        license: "BSD-2-Clause / GPL-2.0-or-later"
+        source: "TODO(operator): Upstream RISC-V firmware repository"
+        replaceable_by_librephone: true
+    treble_compatible: false
+    talos_support_level: "Roadmap"
+    notes: "Roadmap hardware platform exploring RISC-V RV64GC cores with fully open bootROM and physical hardware kill switches."
+
+  # ----------------------------------------------------------------------
+  # Tier C: Treble-Compatible (Sovereign Userspace, Non-Free Firmware)
+  # ----------------------------------------------------------------------
+  - vendor: "Volla"
+    model: "Volla Phone 22"
+    soc: "MediaTek Helio G85 (MT6769V/CZ)"
+    bootloader_unlock: true
+    bootloader_relock: false
+    kill_switches:
+      mic: false
+      camera: false
+      radio: false
+    modem: "MediaTek Integrated 4G LTE Baseband"
+    modem_firmware_status: "proprietary_signed"
+    wifi_bt_firmware_status: "proprietary_signed"
+    gpu_firmware_status: "proprietary_signed"
+    camera_firmware_status: "proprietary_signed"
+    blob_inventory:
+      - component: "MediaTek Cellular Modem Firmware"
+        license: "Proprietary MediaTek"
+        source: "vendor/firmware/md1img.img"
+        replaceable_by_librephone: false
+      - component: "MediaTek Wi-Fi/BT Firmware (Consys)"
+        license: "Proprietary MediaTek"
+        source: "vendor/firmware/WIFI_RAM_CODE_MT6769"
+        replaceable_by_librephone: false
+      - component: "ARM Mali-G52 2EEMC2 GPU Drivers"
+        license: "Proprietary ARM"
+        source: "vendor/lib64/egl/libGLES_mali.so"
+        replaceable_by_librephone: false
+      - component: "MediaTek Camera ISP HAL"
+        license: "Proprietary MediaTek"
+        source: "vendor/lib64/hw/camera.mt6769.so"
+        replaceable_by_librephone: false
+    treble_compatible: true
+    talos_support_level: "Tier C"
+    notes: "Waydroid-capable reference device. Runs TALOS ARM64 system.img over Treble HALs with isolated Waydroid LXC container for Android compatibility."
+
+  - vendor: "Google"
+    model: "Pixel 6"
+    soc: "Google Tensor (GS101)"
+    bootloader_unlock: true
+    bootloader_relock: true
+    kill_switches:
+      mic: false
+      camera: false
+      radio: false
+    modem: "Samsung Shannon 5123 5G Baseband"
+    modem_firmware_status: "proprietary_signed"
+    wifi_bt_firmware_status: "proprietary_signed"
+    gpu_firmware_status: "proprietary_signed"
+    camera_firmware_status: "proprietary_signed"
+    blob_inventory:
+      - component: "Samsung Shannon 5123 5G Modem Firmware"
+        license: "Proprietary Samsung"
+        source: "modem.img / vendor/firmware"
+        replaceable_by_librephone: false
+      - component: "Broadcom BCM4389 Wi-Fi 6E / BT 5.2 Firmware"
+        license: "Proprietary Broadcom"
+        source: "vendor/firmware/bcm4389.bin"
+        replaceable_by_librephone: false
+      - component: "Mali-G78 MP20 Userspace Graphics Driver"
+        license: "Proprietary ARM"
+        source: "vendor/lib64/egl/libGLES_mali.so"
+        replaceable_by_librephone: false
+      - component: "Google TPU / EdgeTPU Camera Neural Accelerator"
+        license: "Proprietary Google Signed"
+        source: "vendor/lib64/libedgetpu.so"
+        replaceable_by_librephone: false
+      - component: "Titan M2 (Dauntless) Security Core Firmware"
+        license: "Proprietary Google Signed"
+        source: "TODO(operator): Verify Google OpenTitan derivation vs proprietary build"
+        replaceable_by_librephone: false
+    treble_compatible: true
+    talos_support_level: "Tier C"
+    notes: "Supports custom AVB 2.0 root-of-trust relocking via fastboot flash avb_custom_key. Runs generic ARM64 Treble system image over Google Tensor GKI kernel."
+
+  - vendor: "Fairphone"
+    model: "Fairphone 4 5G"
+    soc: "Qualcomm Snapdragon 750G (SM7225)"
+    bootloader_unlock: true
+    bootloader_relock: true
+    kill_switches:
+      mic: false
+      camera: false
+      radio: false
+    modem: "Qualcomm Snapdragon X52 5G Baseband"
+    modem_firmware_status: "proprietary_signed"
+    wifi_bt_firmware_status: "proprietary_signed"
+    gpu_firmware_status: "proprietary_signed"
+    camera_firmware_status: "proprietary_signed"
+    blob_inventory:
+      - component: "Qualcomm Hexagon DSP Modem Firmware"
+        license: "Proprietary Qualcomm"
+        source: "modem / NON-HLOS.bin"
+        replaceable_by_librephone: false
+      - component: "Qualcomm WCN3998 Wi-Fi/Bluetooth Firmware"
+        license: "Proprietary Qualcomm"
+        source: "vendor/firmware/wlan/qca_cld/wlan.ko"
+        replaceable_by_librephone: false
+      - component: "Adreno 619 Proprietary GPU Driver"
+        license: "Proprietary Qualcomm"
+        source: "vendor/lib64/egl/libGLESv2_adreno.so"
+        replaceable_by_librephone: true
+      - component: "Qualcomm Spectra 355L ISP Tuning"
+        license: "Proprietary Qualcomm"
+        source: "vendor/lib64/camera/com.qti.sensor.imx582.so"
+        replaceable_by_librephone: false
+    treble_compatible: true
+    talos_support_level: "Tier C"
+    notes: "Modular repairable chassis. Supports AVB verified boot relocking with custom user signing keys. Runs TALOS userspace over Treble AOSP HALs."
+
+  - vendor: "Xiaomi"
+    model: "POCO F3 / Redmi K40"
+    soc: "Qualcomm Snapdragon 870 (SM8250-AC)"
+    bootloader_unlock: true
+    bootloader_relock: false
+    kill_switches:
+      mic: false
+      camera: false
+      radio: false
+    modem: "Qualcomm Snapdragon X55 5G Modem-RF"
+    modem_firmware_status: "proprietary_signed"
+    wifi_bt_firmware_status: "proprietary_signed"
+    gpu_firmware_status: "proprietary_signed"
+    camera_firmware_status: "proprietary_signed"
+    blob_inventory:
+      - component: "Qualcomm Hexagon DSP Baseband Firmware"
+        license: "Proprietary Qualcomm"
+        source: "modem.img / NON-HLOS.bin"
+        replaceable_by_librephone: false
+      - component: "Qualcomm FastConnect 6800 Wi-Fi 6 / BT Firmware"
+        license: "Proprietary Qualcomm"
+        source: "vendor/firmware/qca6800"
+        replaceable_by_librephone: false
+      - component: "Adreno 650 Proprietary GPU Driver"
+        license: "Proprietary Qualcomm"
+        source: "vendor/lib64/egl/libGLESv2_adreno.so"
+        replaceable_by_librephone: true
+      - component: "Spectra 480 Image Signal Processor Tuning"
+        license: "Proprietary Qualcomm"
+        source: "vendor/lib64/camera/com.qti.sensor.imx582.so"
+        replaceable_by_librephone: false
+    treble_compatible: true
+    talos_support_level: "Tier C"
+    notes: "High-performance Treble reference target. Runs TALOS generic system image over Qualcomm BSP. Freedreno open-source GPU userspace can optionally replace Adreno blob on mainline kernels."

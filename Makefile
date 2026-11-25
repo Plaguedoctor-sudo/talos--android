@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint
+.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -63,3 +63,9 @@ reproducible-docker:
 
 reuse-lint:
 	$(PYTHON) scripts/reuse-lint.py
+
+hardware-matrix-check:
+	$(PYTHON) scripts/hardware-matrix.py --check
+
+hardware-matrix-render:
+	$(PYTHON) scripts/hardware-matrix.py --render
