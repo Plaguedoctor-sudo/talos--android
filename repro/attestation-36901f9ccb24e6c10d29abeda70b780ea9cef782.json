@@ -1,0 +1,37 @@
+{
+  "$schema": "https://talos.os/schemas/repro-attestation-v1.json",
+  "git_sha": "36901f9ccb24e6c10d29abeda70b780ea9cef782",
+  "source_date_epoch": 1795613038,
+  "build_env_hash": "dd00921a1ee2c3acaa1379e31acc15ba3a1dab97c2eb1316c6e22a2a3f2fe8db",
+  "build_environment": {
+    "gcc": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "make": "GNU Make 4.3",
+    "python3": "Python 3.12.3",
+    "mke2fs": "",
+    "node": "v18.19.1"
+  },
+  "diff_result": "IDENTICAL",
+  "artifacts_verified_count": 20,
+  "per_artifact_sha256": {
+    "daemons/lrd-bluetooth": "aecea042de79e3df6aa4c4d4b94c549d102cd6b91c83b4ea9bd788dc521ef579",
+    "daemons/lrd-bluetoothd": "e19709053fd6c878d94272711f5120d497e9f3e5a8f05cf3f91fdd96decc2753",
+    "daemons/lrd-firewall": "454e8ffc8e1b1ee59497fa007998ea24a0615103549c6fc3a3566c852387a568",
+    "daemons/lrd-firewalld": "395aa01d0f4fa466be3e9fafc92b7ab8d3b93c7b4debecee64328ab0ea5213a6",
+    "daemons/lrd-sensord": "f7d78ac8ea387ad3fcd2832ae9c01d10b04ec244dcaea74c43b2bc5d638b54af",
+    "daemons/lrd-telephony": "0b6f93ea1470b0a5359150d4f5cba8974fcd0809aa5570798b4c6bdaab8c37c2",
+    "daemons/lrd-telephonyd": "8e082f674c3e25322568972fed2c36928ff5fd4356d7e55d5e2455f03fd6030d",
+    "daemons/lrd-wakelockd": "f501aaaed8d25ba97844cb7904f7952832a7f909e49755b20ac7da57426ffbfb",
+    "daemons/lrd-wifi": "61821739c21d64b87a51d5a999ad020d5b58e37db5a5e047b2adb4d8ef270401",
+    "daemons/lrd-wifid": "e5daa2b1515d4d70cfea133a480a53e138f610fc9cd1d445e6feb4bb1cf9cd50",
+    "images/libredroid-mobile-arm64-treble.img": "4be9363e8a7fd05622291e7df804691bf26120c4d31bccf266c5ebe8eb0f275d",
+    "metadata/build-metadata.json": "0fdeac96a2274aabe26d798df12d4e5fe0bcb37efce1186fc194b26daf81368c",
+    "release/boot-OP5DA6L1-libremobile.img": "28b397ffb7f43527d65d7fc4215949da70544fcf7efb1290ee7fa0a6a0a86e7a",
+    "release/boot-vidofnir-libremobile.img": "28b397ffb7f43527d65d7fc4215949da70544fcf7efb1290ee7fa0a6a0a86e7a",
+    "release/libremobile-1.0-rc-OP5DA6L1.tar.xz": "6a97968d0dc37a8b85677358a7658f20488779ba11fce6301b881ea8793d598e",
+    "release/libremobile-1.0-rc-vidofnir.tar.xz": "8aa283f64030e3e885cd7e8fadc0389cd380dcbd66dacb1ad4abb269e8389416",
+    "release/libremobile-arm64-generic.img": "4be9363e8a7fd05622291e7df804691bf26120c4d31bccf266c5ebe8eb0f275d",
+    "release/vendor_boot-OP5DA6L1-libremobile.img": "af13bceb82692b2ce7ad5cf3b44febd2890f63f7fe8948942d2970fc43d02af9",
+    "release/vendor_boot-vidofnir-libremobile.img": "af13bceb82692b2ce7ad5cf3b44febd2890f63f7fe8948942d2970fc43d02af9",
+    "release/verity-table.json": "1367dc25e77f3413191ccbba012b2e4ca9010b44b143de4cf317f21c98523d34"
+  }
+}

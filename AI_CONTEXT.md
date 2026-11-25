@@ -312,6 +312,9 @@ Always use `make` targets from `/home/alpha/android`:
 | `make build-daemons`| Compiles all 10 C binaries for telephony, bluetooth, wifi, firewall, sensors, and power. |
 | `make verify` | Runs the 9-phase ARGUS verifier on test fixtures. |
 | `make verify-strict` | Runs the ARGUS verifier in strict mode (promotes any warnings to fatal exit 2). |
+| `make reproducible` | Executes dual-build bit-for-bit test across independent paths and publishes attestation JSON. |
+| `make reproducible-verify` | Audits build output directory against published attestation using stdlib-only python. |
+| `make reproducible-docker` | Builds and verifies reproducibility inside pinned debian:bookworm-slim container. |
 | `make clean` | Purges pytest and Python bytecode caches. |
 
 ### 7.2. Adding a New Daemon or Hardware Subsystem
@@ -397,9 +400,11 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
 
 #### 1. Root Workspace Orchestration
 - **[Makefile](file:///home/alpha/android/Makefile)** (2,182 B | 45 lines)
-  - *Aim:* Master build, test, and verification automation. Drives `make check`, `make test-mobile`, `make test-trust`, `make build-daemons`, and `make verify-strict`.
+  - *Aim:* Master build, test, and verification automation. Drives `make check`, `make test-mobile`, `make test-trust`, `make build-daemons`, `make verify-strict`, and `make reproducible`.
+- **[flake.nix](file:///home/alpha/android/flake.nix)** & **[flake.lock](file:///home/alpha/android/flake.lock)**
+  - *Aim:* Hermetic build environment pinning NixOS 23.11 toolchains (gcc, make, node, python3, e2fsprogs, android-tools) for bit-for-bit reproduction across distributions.
 - **[README.md](file:///home/alpha/android/README.md)** (12,825 B | 150 lines)
-  - *Aim:* Primary human-facing architectural specification, system mission statement, hardware matrix, and operator manual.
+  - *Aim:* Primary human-facing architectural specification, system mission statement, hardware matrix, operator manual, and reproducible build guide.
 - **[AI_CONTEXT.md](file:///home/alpha/android/AI_CONTEXT.md)** (24,317+ B)
   - *Aim:* Comprehensive, structured technical reference and IPC protocol manual specifically formatted for AI agents and automated tools.
 - **[server.js](file:///home/alpha/android/server.js)** (15,545 B | 475 lines)
@@ -408,6 +413,16 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
   - *Aim:* Client bundle synthesizer and asset pipeline compiler for the touch Wayland shell.
 - **[package.json](file:///home/alpha/android/package.json)** (409 B | 20 lines)
   - *Aim:* Declares runtime and build-time Node.js dependencies for the web shell and bridge.
+
+#### 1.1. Deterministic Reproducibility & Attestation (`repro/`)
+- **[repro/Dockerfile](file:///home/alpha/android/repro/Dockerfile)**
+  - *Aim:* Fallback container environment pinning `debian:bookworm-slim` by SHA-256 digest (`sha256:d6b63d0b28...`) for reproducible builds without Nix.
+- **[repro/verify-attestation.py](file:///home/alpha/android/repro/verify-attestation.py)**
+  - *Aim:* Standard-library-only Python 3 verifier that re-hashes local build outputs against a machine-verifiable attestation JSON and audits zero divergence.
+- **[repro/README.md](file:///home/alpha/android/repro/README.md)**
+  - *Aim:* Comprehensive third-party audit manual detailing single-command rebuild workflows via Nix, Docker, or native host.
+- **[.github/workflows/repro.yml](file:///home/alpha/android/.github/workflows/repro.yml)**
+  - *Aim:* Continuous integration workflow running a 2-runner matrix (`ubuntu-22.04` and `ubuntu-24.04`) asserting cross-distribution bit-for-bit equality.
 
 #### 2. Cellular Telephony Subsystem (`mobile/telephony/`)
 - **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)** (13,125 B | 357 lines)
@@ -542,6 +557,10 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
   - *Aim:* Hardened GKI kernel configuration with dm-verity, Landlock LSM, and Treble Binder drivers enabled.
 
 #### 14. Operational Security Scripts (`scripts/`)
+- **[repro-build.sh](file:///home/alpha/android/scripts/repro-build.sh)** (4,510 B | 148 lines)
+  - *Aim:* Bit-for-bit deterministic compiler and image builder enforcing C prefix mapping, ext4 hash seeding, and tar timestamp pinning.
+- **[repro-attest.sh](file:///home/alpha/android/scripts/repro-attest.sh)** (3,820 B | 102 lines)
+  - *Aim:* Dual-build attestation generator that builds across isolated paths, diffs artifacts, and publishes machine-verifiable attestation JSON.
 - **[setup-luks-vault.sh](file:///home/alpha/android/scripts/setup-luks-vault.sh)** (5,353 B | 132 lines)
   - *Aim:* Provisions TPM 2.0 / KeyMint hardware-backed LUKS2 encrypted storage partitions.
 - **[security_bootstrap.sh](file:///home/alpha/android/scripts/security_bootstrap.sh)** (4,618 B | 116 lines)

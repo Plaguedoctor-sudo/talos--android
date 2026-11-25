@@ -1,0 +1,90 @@
+# SPDX-FileCopyrightText: 2026 TALOS / LibreMobile OS Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Bit-for-Bit Reproducible Build Matrix
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-verify:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Build Prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            gcc \
+            make \
+            python3 \
+            nodejs \
+            npm \
+            e2fsprogs \
+            tar \
+            xz-utils \
+            diffutils
+
+      - name: Run Dual-Build Reproducibility Suite
+        run: |
+          make reproducible
+
+      - name: Audit Build A Against Published Attestation
+        run: |
+          python3 repro/verify-attestation.py repro/attestation-$(git rev-parse HEAD).json out/a
+
+      - name: Upload Attestation Record
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation-${{ matrix.os }}
+          path: repro/attestation-*.json
+          if-no-files-found: error
+
+      - name: Upload Build SHA256SUMS
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha256sums-${{ matrix.os }}
+          path: out/a/SHA256SUMS.txt
+          if-no-files-found: error
+
+  cross-runner-assert:
+    needs: build-and-verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Ubuntu 22.04 Checksums
+        uses: actions/download-artifact@v4
+        with:
+          name: sha256sums-ubuntu-22.04
+          path: sums-22/
+
+      - name: Download Ubuntu 24.04 Checksums
+        uses: actions/download-artifact@v4
+        with:
+          name: sha256sums-ubuntu-24.04
+          path: sums-24/
+
+      - name: Assert Zero Divergence Across OS Distributions
+        run: |
+          echo "Comparing SHA256SUMS between Ubuntu 22.04 and Ubuntu 24.04..."
+          if diff -u sums-22/SHA256SUMS.txt sums-24/SHA256SUMS.txt; then
+            echo "✔ ZERO DIVERGENCE: Bit-for-bit identical hashes across distribution matrix."
+          else
+            echo "❌ DIVERGENCE DETECTED across runner distributions."
+            exit 1
+          fi

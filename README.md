@@ -147,4 +147,25 @@ make verify
 
 # 6. Run the verifier with strict gate (promotes explained gaps to exit code 2)
 make verify-strict
+
+# 7. Execute dual-build bit-for-bit reproducibility and generate attestation
+make reproducible
+
+# 8. Verify build artifacts against published attestation
+make reproducible-verify
+
+# 9. Build inside hermetic Docker fallback container
+make reproducible-docker
 ```
+
+---
+
+## 5. Bit-for-Bit Reproducible Builds & Attestation
+
+TALOS / LibreMobile OS achieves 100% bit-for-bit deterministic reproducibility across independent paths and environments.
+
+- **Primary Path (Nix Flake):** Run `nix develop --command make reproducible` (pinned NixOS 23.11 channel via [`flake.nix`](file:///home/alpha/android/flake.nix) and [`flake.lock`](file:///home/alpha/android/flake.lock)).
+- **Container Fallback:** Run `make reproducible-docker` (pinned to Debian Bookworm via [`repro/Dockerfile`](file:///home/alpha/android/repro/Dockerfile)).
+- **Dual-Build Attestation:** [`scripts/repro-attest.sh`](file:///home/alpha/android/scripts/repro-attest.sh) builds into `out/a` and an isolated temporary tree `out/b`, diffs them bit-for-bit, and publishes machine-verifiable records in [`repro/attestation-<git-sha>.json`](file:///home/alpha/android/repro).
+- **Verification Engine:** [`repro/verify-attestation.py`](file:///home/alpha/android/repro/verify-attestation.py) provides stdlib-only cryptographic hash auditing for downstream consumers.
+- **Third-Party Guide:** Complete reproduction guide in [`repro/README.md`](file:///home/alpha/android/repro/README.md).

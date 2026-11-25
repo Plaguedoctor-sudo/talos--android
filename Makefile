@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean
+.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -42,4 +42,21 @@ check: test-trust test-mobile verify-strict
 	@echo "========================================================================"
 
 clean:
-	rm -rf .pytest_cache tests/argx/__pycache__ tests/tag/__pycache__ argus/__pycache__ argus/*/__pycache__
+	rm -rf .pytest_cache tests/argx/__pycache__ tests/tag/__pycache__ argus/__pycache__ argus/*/__pycache__ out
+
+reproducible:
+	@chmod +x scripts/repro-build.sh scripts/repro-attest.sh repro/verify-attestation.py
+	./scripts/repro-attest.sh
+
+ATTESTATION ?= $(firstword $(wildcard repro/attestation-*.json))
+BUILD_DIR ?= out/a
+
+reproducible-verify:
+	@if [ -z "$(ATTESTATION)" ]; then \
+		echo "Error: No attestation specified. Usage: make reproducible-verify ATTESTATION=repro/attestation-<sha>.json BUILD_DIR=out/a"; \
+		exit 1; \
+	fi
+	$(PYTHON) repro/verify-attestation.py $(ATTESTATION) $(BUILD_DIR)
+
+reproducible-docker:
+	docker build -f repro/Dockerfile -t talos-repro:latest .
