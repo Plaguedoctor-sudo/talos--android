@@ -1,3 +1,4 @@
-# Files allowed by pre-commit-key-guard
+# Files allowed by pre-commit-key-guard and Key Guard CI.
+# Non-sensitive public test fixtures (certificates, public verification keys).
 # Format: repo-relative paths or patterns
 tests/argx/fixtures/*

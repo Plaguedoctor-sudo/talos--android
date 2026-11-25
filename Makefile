@@ -7,7 +7,7 @@ export PYTHONPATH
 all: check
 
 fixture:
-	$(PYTHON) tests/argx/make_fixture.py
+	@if [ ! -d tests/argx/fixtures/basic.argx ]; then $(PYTHON) tests/argx/make_fixture.py; fi
 
 test-trust: fixture
 	$(PYTHON) -m pytest tests/argx/test_tamper.py tests/tag/test_tags.py tests/producers/test_producers.py tests/producers/test_ledger.py tests/producers/test_degraded.py tests/e2e/test_roundtrip.py tests/e2e/test_range.py tests/e2e/test_multiboot.py tests/verify/test_grade.py -v
