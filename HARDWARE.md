@@ -14,6 +14,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ## 1. Tier Definitions & Certification Criteria
 
+> **Important Disclaimer:** A device is listed as Tier A only when EVERY active component's firmware has been independently verified as free software. As of this commit, NO device meets Tier A. Tier B and Tier C listings reflect the current honest state of each device's firmware.
+
 TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" or "100% free" on hardware where binary blobs exist. Hardware support is classified into four explicit, verifiable tiers:
 
 - **Tier A (Fully Free):**
@@ -77,10 +79,10 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| Realtek RTL8723CS Wi-Fi/Bluetooth Firmware | Proprietary Realtek | `linux-firmware / rtl_bt/rtl8723cs_xx.bin` | ✔ Candidate |
-| Quectel EG25-G Hexagon DSP Baseband Blob | Proprietary Qualcomm Hexagon | `Quectel Stock Firmware (isolated via USB)` | ✖ Silicon Locked |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| Realtek RTL8723CS Wi-Fi/Bluetooth Firmware | Proprietary Realtek | `linux-firmware / rtl_bt/rtl8723cs_xx.bin` | ⚠ Unverified | — | ✔ Candidate |
+| Quectel EG25-G Hexagon DSP Baseband Blob | Proprietary Qualcomm Hexagon | `Quectel Stock Firmware (isolated via USB)` | ⚠ Unverified | — | ✖ Silicon Locked |
 
 > **Operator Notes:** Hardware DIP kill-switches on rear chassis. Runs mainline Linux kernel with open-source Lima GPU driver. Modem userspace replaced with Biktor open-source firmware, though isolated Hexagon DSP blob remains.
 
@@ -106,10 +108,10 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| Broadcom/Cypress BCM43455 Wi-Fi/BT Firmware | Proprietary Cypress | `linux-firmware / brcm/brcmfmac43455-sdio.bin` | ✔ Candidate |
-| Quectel EG25-G Hexagon DSP Baseband Blob | Proprietary Qualcomm Hexagon | `Quectel Stock Firmware (isolated via USB)` | ✖ Silicon Locked |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| Broadcom/Cypress BCM43455 Wi-Fi/BT Firmware | Proprietary Cypress | `linux-firmware / brcm/brcmfmac43455-sdio.bin` | ⚠ Unverified | — | ✔ Candidate |
+| Quectel EG25-G Hexagon DSP Baseband Blob | Proprietary Qualcomm Hexagon | `Quectel Stock Firmware (isolated via USB)` | ⚠ Unverified | — | ✖ Silicon Locked |
 
 > **Operator Notes:** Mainline Linux kernel with open Panfrost Mali-T860 GPU driver and rkisp1 camera pipeline. Hardware kill switches for modem, Wi-Fi, mic, and cameras.
 
@@ -135,11 +137,11 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| Redpine Signals RS9116 / SparkLAN Wi-Fi/BT Firmware | Proprietary Redpine Signals | `linux-firmware / rsi_91x.fw` | ✔ Candidate |
-| Broadmobi BM818 / Gemalto PLS8 Baseband Firmware | Proprietary Qualcomm/Gemalto | `M.2 Modem Module (isolated via USB)` | ✖ Silicon Locked |
-| NXP DDR PHY Memory Training Firmware | Proprietary NXP | `imx-atf / ddr-phy` | ✖ Silicon Locked |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| Redpine Signals RS9116 / SparkLAN Wi-Fi/BT Firmware | Proprietary Redpine Signals | `linux-firmware / rsi_91x.fw` | ⚠ Unverified | — | ✔ Candidate |
+| Broadmobi BM818 / Gemalto PLS8 Baseband Firmware | Proprietary Qualcomm/Gemalto | `M.2 Modem Module (isolated via USB)` | ⚠ Unverified | — | ✖ Silicon Locked |
+| NXP DDR PHY Memory Training Firmware | Proprietary NXP | `imx-atf / ddr-phy` | ⚠ Unverified | — | ✖ Silicon Locked |
 
 > **Operator Notes:** Hardware slide switches for Cellular, Wi-Fi/Bluetooth, and Camera/Microphone. Free Etnaviv GPU userspace driver. All cellular traffic physically isolated on USB.
 
@@ -167,12 +169,12 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| Qualcomm Hexagon DSP Modem Firmware | Proprietary Qualcomm | `modem / NON-HLOS.bin` | ✖ Silicon Locked |
-| Qualcomm WCN3998 Wi-Fi/Bluetooth Firmware | Proprietary Qualcomm | `vendor/firmware/wlan/qca_cld/wlan.ko` | ✖ Silicon Locked |
-| Adreno 619 Proprietary GPU Driver | Proprietary Qualcomm | `vendor/lib64/egl/libGLESv2_adreno.so` | ✔ Candidate |
-| Qualcomm Spectra 355L ISP Tuning | Proprietary Qualcomm | `vendor/lib64/camera/com.qti.sensor.imx582.so` | ✖ Silicon Locked |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| Qualcomm Hexagon DSP Modem Firmware | Proprietary Qualcomm | `modem / NON-HLOS.bin` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Qualcomm WCN3998 Wi-Fi/Bluetooth Firmware | Proprietary Qualcomm | `vendor/firmware/wlan/qca_cld/wlan.ko` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Adreno 619 Proprietary GPU Driver | Proprietary Qualcomm | `vendor/lib64/egl/libGLESv2_adreno.so` | ⚠ Unverified | — | ✔ Candidate |
+| Qualcomm Spectra 355L ISP Tuning | Proprietary Qualcomm | `vendor/lib64/camera/com.qti.sensor.imx582.so` | ⚠ Unverified | — | ✖ Silicon Locked |
 
 > **Operator Notes:** Modular repairable chassis. Supports AVB verified boot relocking with custom user signing keys. Runs TALOS userspace over Treble AOSP HALs.
 
@@ -198,13 +200,13 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| Samsung Shannon 5123 5G Modem Firmware | Proprietary Samsung | `modem.img / vendor/firmware` | ✖ Silicon Locked |
-| Broadcom BCM4389 Wi-Fi 6E / BT 5.2 Firmware | Proprietary Broadcom | `vendor/firmware/bcm4389.bin` | ✖ Silicon Locked |
-| Mali-G78 MP20 Userspace Graphics Driver | Proprietary ARM | `vendor/lib64/egl/libGLES_mali.so` | ✖ Silicon Locked |
-| Google TPU / EdgeTPU Camera Neural Accelerator | Proprietary Google Signed | `vendor/lib64/libedgetpu.so` | ✖ Silicon Locked |
-| Titan M2 (Dauntless) Security Core Firmware | Proprietary Google Signed | `TODO(operator): Verify Google OpenTitan derivation vs proprietary build` | ✖ Silicon Locked |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| Samsung Shannon 5123 5G Modem Firmware | Proprietary Samsung | `modem.img / vendor/firmware` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Broadcom BCM4389 Wi-Fi 6E / BT 5.2 Firmware | Proprietary Broadcom | `vendor/firmware/bcm4389.bin` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Mali-G78 MP20 Userspace Graphics Driver | Proprietary ARM | `vendor/lib64/egl/libGLES_mali.so` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Google TPU / EdgeTPU Camera Neural Accelerator | Proprietary Google Signed | `vendor/lib64/libedgetpu.so` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Titan M2 (Dauntless) Security Core Firmware | Proprietary Google Signed | `TODO(operator): Verify Google OpenTitan derivation vs proprietary build` | ⚠ Unverified | — | ✖ Silicon Locked |
 
 > **Operator Notes:** Supports custom AVB 2.0 root-of-trust relocking via fastboot flash avb_custom_key. Runs generic ARM64 Treble system image over Google Tensor GKI kernel.
 
@@ -230,12 +232,12 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| MediaTek Cellular Modem Firmware | Proprietary MediaTek | `vendor/firmware/md1img.img` | ✖ Silicon Locked |
-| MediaTek Wi-Fi/BT Firmware (Consys) | Proprietary MediaTek | `vendor/firmware/WIFI_RAM_CODE_MT6769` | ✖ Silicon Locked |
-| ARM Mali-G52 2EEMC2 GPU Drivers | Proprietary ARM | `vendor/lib64/egl/libGLES_mali.so` | ✖ Silicon Locked |
-| MediaTek Camera ISP HAL | Proprietary MediaTek | `vendor/lib64/hw/camera.mt6769.so` | ✖ Silicon Locked |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| MediaTek Cellular Modem Firmware | Proprietary MediaTek | `vendor/firmware/md1img.img` | ⚠ Unverified | — | ✖ Silicon Locked |
+| MediaTek Wi-Fi/BT Firmware (Consys) | Proprietary MediaTek | `vendor/firmware/WIFI_RAM_CODE_MT6769` | ⚠ Unverified | — | ✖ Silicon Locked |
+| ARM Mali-G52 2EEMC2 GPU Drivers | Proprietary ARM | `vendor/lib64/egl/libGLES_mali.so` | ⚠ Unverified | — | ✖ Silicon Locked |
+| MediaTek Camera ISP HAL | Proprietary MediaTek | `vendor/lib64/hw/camera.mt6769.so` | ⚠ Unverified | — | ✖ Silicon Locked |
 
 > **Operator Notes:** Waydroid-capable reference device. Runs TALOS ARM64 system.img over Treble HALs with isolated Waydroid LXC container for Android compatibility.
 
@@ -261,12 +263,12 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| Qualcomm Hexagon DSP Baseband Firmware | Proprietary Qualcomm | `modem.img / NON-HLOS.bin` | ✖ Silicon Locked |
-| Qualcomm FastConnect 6800 Wi-Fi 6 / BT Firmware | Proprietary Qualcomm | `vendor/firmware/qca6800` | ✖ Silicon Locked |
-| Adreno 650 Proprietary GPU Driver | Proprietary Qualcomm | `vendor/lib64/egl/libGLESv2_adreno.so` | ✔ Candidate |
-| Spectra 480 Image Signal Processor Tuning | Proprietary Qualcomm | `vendor/lib64/camera/com.qti.sensor.imx582.so` | ✖ Silicon Locked |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| Qualcomm Hexagon DSP Baseband Firmware | Proprietary Qualcomm | `modem.img / NON-HLOS.bin` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Qualcomm FastConnect 6800 Wi-Fi 6 / BT Firmware | Proprietary Qualcomm | `vendor/firmware/qca6800` | ⚠ Unverified | — | ✖ Silicon Locked |
+| Adreno 650 Proprietary GPU Driver | Proprietary Qualcomm | `vendor/lib64/egl/libGLESv2_adreno.so` | ⚠ Unverified | — | ✔ Candidate |
+| Spectra 480 Image Signal Processor Tuning | Proprietary Qualcomm | `vendor/lib64/camera/com.qti.sensor.imx582.so` | ⚠ Unverified | — | ✖ Silicon Locked |
 
 > **Operator Notes:** High-performance Treble reference target. Runs TALOS generic system image over Qualcomm BSP. Freedreno open-source GPU userspace can optionally replace Adreno blob on mainline kernels.
 
@@ -294,10 +296,10 @@ TALOS / LibreMobile OS rejects overbroad marketing claims such as "fully open" o
 
 **Proprietary Binary Blob Inventory:**
 
-| Component | License | Source / Partition | Replaceable by Librephone |
-| :--- | :--- | :--- | :---: |
-| TODO(operator): Target Open-Silicon Baseband DSP or COTS M.2 Module | TODO(operator): Pending hardware partner evaluation | `TODO(operator): Upstream vendor specification` | ✔ Candidate |
-| TODO(operator): Open SBI / U-Boot SPL bootloader payload | BSD-2-Clause / GPL-2.0-or-later | `TODO(operator): Upstream RISC-V firmware repository` | ✔ Candidate |
+| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| TODO(operator): Target Open-Silicon Baseband DSP or COTS M.2 Module | TODO(operator): Pending hardware partner evaluation | `TODO(operator): Upstream vendor specification` | ⚠ Unverified | — | ❓ Unknown |
+| TODO(operator): Open SBI / U-Boot SPL bootloader payload | BSD-2-Clause / GPL-2.0-or-later | `TODO(operator): Upstream RISC-V firmware repository` | ⚠ Unverified | — | ⏳ In Progress |
 
 > **Operator Notes:** Roadmap hardware platform exploring RISC-V RV64GC cores with fully open bootROM and physical hardware kill switches.
 

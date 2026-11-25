@@ -107,7 +107,7 @@
           "description": "Inventory of closed-source blobs required for device boot or functionality.",
           "items": {
             "type": "object",
-            "required": ["component", "license", "source", "replaceable_by_librephone"],
+            "required": ["component", "license", "source", "replaceable_by_librephone", "verified"],
             "properties": {
               "component": {
                 "type": "string",
@@ -121,9 +121,31 @@
                 "type": "string",
                 "description": "Origin repository, vendor partition, or package source."
               },
-              "replaceable_by_librephone": {
+              "source_url": {
+                "type": "string",
+                "description": "Canonical URI for the firmware binary or vendor driver."
+              },
+              "verified": {
                 "type": "boolean",
+                "description": "Whether firmware provenance has been independently verified by the operator."
+              },
+              "replaceable_by_librephone": {
+                "enum": [true, false, "unknown", "in_progress"],
                 "description": "Whether Librephone / community reverse-engineering can replace this blob."
+              }
+            },
+            "if": {
+              "properties": {
+                "verified": { "const": true }
+              }
+            },
+            "then": {
+              "required": ["source_url"],
+              "properties": {
+                "source_url": {
+                  "type": "string",
+                  "format": "uri"
+                }
               }
             },
             "additionalProperties": false

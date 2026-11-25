@@ -111,8 +111,15 @@ def _fallback_parse_yaml(file_path: Path) -> Dict[str, Any]:
             elif current_blob is not None and indent >= 8 and ":" in stripped:
                 k, v = [x.strip() for x in stripped.split(":", 1)]
                 v_clean = v.strip('"\'')
-                if k == "replaceable_by_librephone":
+                if k == "verified":
                     current_blob[k] = (v_clean.lower() == "true")
+                elif k == "replaceable_by_librephone":
+                    if v_clean.lower() == "true":
+                        current_blob[k] = True
+                    elif v_clean.lower() == "false":
+                        current_blob[k] = False
+                    else:
+                        current_blob[k] = v_clean
                 else:
                     current_blob[k] = v_clean
                 continue
@@ -206,12 +213,43 @@ def validate_matrix(data: Dict[str, Any], schema: Dict[str, Any]) -> List[str]:
                 if not isinstance(b, dict):
                     errors.append(f"{dev_label} blob #{b_idx + 1}: entry must be a dictionary.")
                     continue
-                for b_field in ["component", "license", "source", "replaceable_by_librephone"]:
+                for b_field in ["component", "license", "source", "replaceable_by_librephone", "verified"]:
                     if b_field not in b:
                         errors.append(f"{dev_label} blob #{b_idx + 1}: missing field '{b_field}'.")
 
+                v = b.get("verified")
+                if not isinstance(v, bool):
+                    errors.append(f"{dev_label} blob #{b_idx + 1}: 'verified' must be a boolean.")
+                elif v is True:
+                    url = b.get("source_url")
+                    if not url or not isinstance(url, str) or not (url.startswith("http://") or url.startswith("https://")):
+                        errors.append(f"{dev_label} blob #{b_idx + 1}: verified is true, so 'source_url' must be a valid http(s) URL.")
+
+                repl = b.get("replaceable_by_librephone")
+                if repl not in (True, False, "unknown", "in_progress", "true", "false"):
+                    errors.append(f"{dev_label} blob #{b_idx + 1}: invalid 'replaceable_by_librephone' value '{repl}'.")
+
+                # STEP 4.3: Reject any entry where verified: false is combined with Tier A or "fully free" claim
+                if v is False:
+                    if tier.lower() in ("tier a", "tier-a"):
+                        errors.append(
+                            f"{dev_label}: Has unverified firmware blob '{b.get('component')}' (verified: false) "
+                            f"combined with '{tier}'. Rule violation: Tier A strictly requires 100% verified free firmware."
+                        )
+                    notes_str = str(dev.get("notes", "")).lower()
+                    if "fully free" in notes_str or "100% free" in notes_str:
+                        errors.append(
+                            f"{dev_label}: Marketing claim of 'fully free' prohibited with unverified blobs."
+                        )
+
         # ACCEPTANCE GATE RULE:
         # Every device entry with any proprietary_* firmware is Tier B or C, never Tier A.
+        # As of this release, NO device meets Tier A.
+        if tier == "Tier A":
+            errors.append(
+                f"{dev_label}: Certified as '{tier}'. "
+                f"Rule violation: As of this release, NO commercial device meets Tier A standards."
+            )
         has_proprietary = any(
             str(dev.get(fw_key, "")).startswith("proprietary_")
             for fw_key in ["modem_firmware_status", "wifi_bt_firmware_status", "gpu_firmware_status", "camera_firmware_status"]
@@ -246,6 +284,10 @@ def render_markdown(data: Dict[str, Any]) -> str:
     lines.append("---")
     lines.append("")
     lines.append("## 1. Tier Definitions & Certification Criteria")
+    lines.append("")
+    lines.append(
+        "> **Important Disclaimer:** A device is listed as Tier A only when EVERY active component's firmware has been independently verified as free software. As of this commit, NO device meets Tier A. Tier B and Tier C listings reflect the current honest state of each device's firmware."
+    )
     lines.append("")
     lines.append("TALOS / LibreMobile OS rejects overbroad marketing claims such as \"fully open\" or \"100% free\" on hardware where binary blobs exist. Hardware support is classified into four explicit, verifiable tiers:")
     lines.append("")
@@ -344,14 +386,30 @@ def render_markdown(data: Dict[str, Any]) -> str:
         if blobs:
             lines.append("**Proprietary Binary Blob Inventory:**")
             lines.append("")
-            lines.append("| Component | License | Source / Partition | Replaceable by Librephone |")
-            lines.append("| :--- | :--- | :--- | :---: |")
+            lines.append("| Component | License | Source / Partition | Verification Status | Source URL | Replaceable by Librephone |")
+            lines.append("| :--- | :--- | :--- | :---: | :---: | :---: |")
             for b in blobs:
                 comp = b.get("component", "")
                 lic = b.get("license", "")
                 src = b.get("source", "")
-                repl = "✔ Candidate" if b.get("replaceable_by_librephone") else "✖ Silicon Locked"
-                lines.append(f"| {comp} | {lic} | `{src}` | {repl} |")
+                v = b.get("verified")
+                if v is True:
+                    v_str = "✅ Verified"
+                elif v is False:
+                    v_str = "⚠ Unverified"
+                else:
+                    v_str = "❓ Unknown"
+                url = b.get("source_url") or "—"
+                repl_val = b.get("replaceable_by_librephone")
+                if repl_val is True or repl_val == "true":
+                    repl = "✔ Candidate"
+                elif repl_val == "in_progress":
+                    repl = "⏳ In Progress"
+                elif repl_val == "unknown":
+                    repl = "❓ Unknown"
+                else:
+                    repl = "✖ Silicon Locked"
+                lines.append(f"| {comp} | {lic} | `{src}` | {v_str} | {url} | {repl} |")
             lines.append("")
         else:
             lines.append("*No proprietary blobs required for this device configuration.*")
