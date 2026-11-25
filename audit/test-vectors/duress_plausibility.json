@@ -1,0 +1,49 @@
+{
+  "title": "ARGUS Decoy Plausibility Scoring Vectors",
+  "invariant": "INV-D3 (Plausibility Lower Bound)",
+  "minimum_enrollment_threshold": 60.0,
+  "scenarios": [
+    {
+      "name": "daily_driver_active_phone",
+      "inputs": {
+        "data_volume_mb": 1250.0,
+        "app_count": 32,
+        "history_age_days": 180.0,
+        "contact_count": 45,
+        "message_count": 820
+      },
+      "expected_score": 100.0,
+      "threshold": 60.0,
+      "acceptable": true,
+      "calculated_score": 100.0
+    },
+    {
+      "name": "believable_secondary_phone",
+      "inputs": {
+        "data_volume_mb": 350.0,
+        "app_count": 14,
+        "history_age_days": 45.0,
+        "contact_count": 12,
+        "message_count": 95
+      },
+      "expected_score": 87.83,
+      "threshold": 60.0,
+      "acceptable": true,
+      "calculated_score": 87.83
+    },
+    {
+      "name": "freshly_wiped_burn_phone",
+      "inputs": {
+        "data_volume_mb": 25.0,
+        "app_count": 3,
+        "history_age_days": 2.0,
+        "contact_count": 1,
+        "message_count": 2
+      },
+      "expected_score": 9.17,
+      "threshold": 60.0,
+      "acceptable": false,
+      "calculated_score": 9.17
+    }
+  ]
+}

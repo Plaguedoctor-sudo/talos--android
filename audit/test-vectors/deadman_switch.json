@@ -1,0 +1,48 @@
+{
+  "title": "ARGUS Dead Man's Switch Timeout and Policy Vectors",
+  "invariant": "INV-H1 (Zero False Positives within Grace), INV-H2 (Offline Policy Guard)",
+  "timeout_seconds": 172800.0,
+  "last_heartbeat_epoch": 1700000000.0,
+  "test_cases": [
+    {
+      "scenario": "routine_active_checkin",
+      "elapsed_seconds": 3600.0,
+      "is_offline": false,
+      "allow_offline_wipe": false,
+      "expected_status": "ACTIVE",
+      "expected_wipe": false
+    },
+    {
+      "scenario": "approaching_deadline_warning",
+      "elapsed_seconds": 140000.0,
+      "is_offline": false,
+      "allow_offline_wipe": false,
+      "expected_status": "WARNING",
+      "expected_wipe": false
+    },
+    {
+      "scenario": "overdue_travel_offline_guarded",
+      "elapsed_seconds": 250000.0,
+      "is_offline": true,
+      "allow_offline_wipe": false,
+      "expected_status": "TRIGGERED",
+      "expected_wipe": false
+    },
+    {
+      "scenario": "overdue_compelled_offline_armed",
+      "elapsed_seconds": 250000.0,
+      "is_offline": true,
+      "allow_offline_wipe": true,
+      "expected_status": "TRIGGERED",
+      "expected_wipe": true
+    },
+    {
+      "scenario": "overdue_online_escalated",
+      "elapsed_seconds": 250000.0,
+      "is_offline": false,
+      "allow_offline_wipe": false,
+      "expected_status": "TRIGGERED",
+      "expected_wipe": true
+    }
+  ]
+}

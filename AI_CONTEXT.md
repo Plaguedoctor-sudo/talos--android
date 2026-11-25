@@ -440,6 +440,20 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
 - **[hardware/matrix.yaml](file:///home/alpha/android/hardware/matrix.yaml)**: Machine-readable database of tested devices, SoC details, bootloader relocking support, kill-switch status, firmware provenance, and binary blob catalogs.
 - **[scripts/hardware-matrix.py](file:///home/alpha/android/scripts/hardware-matrix.py)**: Python stdlib validator enforcing schema rules, tier consistency (prohibiting proprietary blobs in Tier A), and deterministic idempotent Markdown rendering. Driven by `make hardware-matrix-check` and `make hardware-matrix-render`.
 
+#### 1.4. Third-Party Audit Preparation & Property Verification (`audit/` & `SECURITY-AUDIT.md`)
+- **[SECURITY-AUDIT.md](file:///home/alpha/android/SECURITY-AUDIT.md)**: Public audit status dashboard, scope summary, and operator tracking for auditor selection.
+- **[audit/SCOPE.md](file:///home/alpha/android/audit/SCOPE.md)**: Cryptographic audit boundary defining exact in-scope file paths, line ranges (`argus/argf2`, `tag_commit`, `duress.py`, `deadman.py`, `vault.py`, `verify.py`), and out-of-scope exclusions.
+- **[audit/THREAT-MODEL.md](file:///home/alpha/android/audit/THREAT-MODEL.md)**: Formal threat model detailing 5 adversary tiers, 4 protected asset classes, and mathematical invariants (`INV-M1` through `INV-H2`).
+- **[audit/RFP.md](file:///home/alpha/android/audit/RFP.md)**: Request-for-proposal template with auditor credentials, deliverables, timeline, and surveillance-free funding terms.
+- **[audit/findings/TEMPLATE.md](file:///home/alpha/android/audit/findings/TEMPLATE.md)**: Standard vulnerability disclosure template and severity grading rubric combining CVSS v3.1 with sovereign impact levels.
+- **[audit/test-vectors/](file:///home/alpha/android/audit/test-vectors)**: Committed static test vectors for Merkle arity-4, epoch rollover, duress plausibility, deadman timeouts, and vault custody chains.
+- **Property Test Suites**:
+  - [`tests/test_argf2_properties.py`](file:///home/alpha/android/tests/test_argf2_properties.py): Hypothesis property tests asserting Merkle arity-4 proof correctness, single-bit tamper sensitivity, proof size bounds, and crash-resilient epoch rollover.
+  - [`tests/test_duress_properties.py`](file:///home/alpha/android/tests/test_duress_properties.py): Property tests verifying decoy plausibility score bounds, monotonicity, enrollment threshold gating, and session routing isolation.
+  - [`tests/test_deadman_properties.py`](file:///home/alpha/android/tests/test_deadman_properties.py): Property tests proving zero false-positives within grace periods, offline wipe policy authorization guards, and status monotonicity.
+  - [`tests/test_audit_vectors.py`](file:///home/alpha/android/tests/test_audit_vectors.py): Automated regression test asserting all committed static vectors pass invariant checks.
+  - Driven by `make audit-prep`.
+
 #### 2. Cellular Telephony Subsystem (`mobile/telephony/`)
 - **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)** (13,125 B | 357 lines)
   - *Aim:* Native C telephony daemon (`< 2 MB` RSS). Connects to Qualcomm/MediaTek baseband via ModemManager / `mmcli`, controls SIM state, routes VoLTE/VoNR audio streams, handles SMS lifecycle, and exposes `/run/libredroid/telephony.sock`.

@@ -53,12 +53,55 @@ __all__ = [
     "verify_password",
     "hash_password",
     "log_duress_session",
+    "DecoyPlausibility",
+    "PlausibilityError",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Decoy Plausibility
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class DecoyPlausibility:
+    data_volume_mb: float
+    app_count: int
+    history_age_days: float
+    contact_count: int = 15
+    message_count: int = 50
+
+    def score(self) -> float:
+        """Compute composite plausibility score between 0.0 and 100.0.
+
+        Inputs:
+          - data_volume_mb: size of user storage (target >= 500 MB)
+          - app_count: count of installed applications (target >= 15)
+          - history_age_days: oldest log timestamp age (target >= 30 days)
+          - contact_count & message_count: communication history
+        """
+        v_norm = min(1.0, max(0.0, self.data_volume_mb) / 500.0)
+        a_norm = min(1.0, max(0, self.app_count) / 15.0)
+        h_norm = min(1.0, max(0.0, self.history_age_days) / 30.0)
+        c_norm = min(1.0, max(0, self.contact_count + (self.message_count // 10)) / 20.0)
+
+        composite = (0.35 * v_norm + 0.25 * a_norm + 0.25 * h_norm + 0.15 * c_norm) * 100.0
+        return round(composite, 2)
+
+    def is_plausible(self, threshold: float = 60.0) -> bool:
+        return self.score() >= threshold
+
+
+class PlausibilityError(ValueError):
+    """Raised when decoy environment fails plausibility verification."""
 
 
 # ---------------------------------------------------------------------------
 # Password hashing
 # ---------------------------------------------------------------------------
+
+
+PBKDF2_ITERATIONS = 600_000
 
 
 def hash_password(password: str, *, salt: bytes | None = None) -> tuple[str, str]:
@@ -70,7 +113,7 @@ def hash_password(password: str, *, salt: bytes | None = None) -> tuple[str, str
     if not password:
         raise ValueError("password must be non-empty")
     s = salt if salt is not None else secrets.token_bytes(16)
-    h = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), s, 600_000)
+    h = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), s, PBKDF2_ITERATIONS)
     return s.hex(), h.hex()
 
 
@@ -85,7 +128,7 @@ def verify_password(
         expected = bytes.fromhex(hash_hex)
     except (ValueError, TypeError):
         return False
-    candidate = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 600_000)
+    candidate = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, PBKDF2_ITERATIONS)
     return hmac.compare_digest(candidate, expected)
 
 
@@ -162,6 +205,21 @@ class DuressStore:
                 (kind, salt_hex, hash_hex, timebase.iso_now()),
             )
             self._conn.commit()
+
+    def enroll_decoy(
+        self,
+        password: str,
+        plausibility: DecoyPlausibility,
+        threshold: float = 60.0,
+    ) -> float:
+        """Enroll duress credential only if decoy passes plausibility threshold."""
+        score = plausibility.score()
+        if score < threshold:
+            raise PlausibilityError(
+                f"Decoy plausibility score {score:.1f} below required threshold {threshold:.1f}. Enrollment rejected."
+            )
+        self.set_password("duress", password)
+        return score
 
     def has(self, kind: str) -> bool:
         with self._lock:

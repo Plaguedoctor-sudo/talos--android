@@ -90,7 +90,6 @@ show_osk() {
     else
         # Spawn active layer-shell OSK supervisor daemon
         (
-            echo "$$" > "$PID_FILE"
             FIFO="$STATE_DIR/input.fifo"
             rm -f "$FIFO"
             mkfifo "$FIFO" 2>/dev/null || true

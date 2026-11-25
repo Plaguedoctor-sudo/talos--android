@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render
+.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render audit-prep
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -69,3 +69,8 @@ hardware-matrix-check:
 
 hardware-matrix-render:
 	$(PYTHON) scripts/hardware-matrix.py --render
+
+audit-prep:
+	@mkdir -p audit/test-vectors
+	$(PYTHON) scripts/generate-audit-vectors.py
+	$(PYTHON) -m pytest tests/test_argf2_properties.py tests/test_duress_properties.py tests/test_deadman_properties.py tests/test_audit_vectors.py --cov=argus --cov-report=term | tee audit/coverage-report.txt

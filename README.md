@@ -12,9 +12,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 [![Governance: Sovereign Commons](https://img.shields.io/badge/governance-antimonopoly%20commons-purple.svg)](GOVERNANCE.md)
 [![Target Platform](https://img.shields.io/badge/target-ARM64--v8a%20Treble%20A%2FB-red.svg)](HARDWARE.md)
 [![Hardware Matrix](https://img.shields.io/badge/hardware-tiered%20certification-blue.svg)](HARDWARE.md)
+[![Security Audit](https://img.shields.io/badge/security%20audit-RFP%20open-orange.svg)](SECURITY-AUDIT.md)
 
 > **Target Platform:** ARM64-v8a Smartphones and Tablets (Project Treble A/B Devices & Native Linux Phones)  
 > **Hardware Certification:** [HARDWARE.md](file:///home/alpha/android/HARDWARE.md) | [hardware/matrix.yaml](file:///home/alpha/android/hardware/matrix.yaml)  
+> **Security Audit Status:** [SECURITY-AUDIT.md](file:///home/alpha/android/SECURITY-AUDIT.md) | [audit/SCOPE.md](file:///home/alpha/android/audit/SCOPE.md) | [audit/RFP.md](file:///home/alpha/android/audit/RFP.md)  
 > **Architecture:** Pure GNU/Linux userspace over Treble Vendor HALs, GKI Kernels, and the ARGUS Cryptographic Trust Spine  
 > **Repository:** `/home/alpha/android`  
 > **AI & Agent Technical Manual:** [AI_CONTEXT.md](file:///home/alpha/android/AI_CONTEXT.md)  

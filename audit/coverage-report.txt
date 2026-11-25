@@ -1,0 +1,57 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.2.0, pluggy-1.7.0
+rootdir: /home/alpha/android
+plugins: cov-7.1.0, hypothesis-6.170.17
+collected 18 items
+
+tests/test_argf2_properties.py ......                                    [ 33%]
+tests/test_duress_properties.py ....                                     [ 55%]
+tests/test_deadman_properties.py ...                                     [ 72%]
+tests/test_audit_vectors.py .....                                        [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+Name                                     Stmts   Miss  Cover
+------------------------------------------------------------
+argus/__init__.py                            3      0   100%
+argus/alibi.py                             106    106     0%
+argus/argf2/__init__.py                      0      0   100%
+argus/argf2/config.py                       71     71     0%
+argus/argf2/export.py                      218    218     0%
+argus/argf2/ledger.py                      213    213     0%
+argus/argf2/ledgerd.py                     113    113     0%
+argus/argf2/producers/__init__.py            6      6     0%
+argus/argf2/producers/audit_netlink.py      75     75     0%
+argus/argf2/producers/capability.py         42     42     0%
+argus/argf2/producers/drain.py              37     37     0%
+argus/argf2/producers/enrich.py             26     26     0%
+argus/argf2/producers/ring.py               30     30     0%
+argus/argf2/producers/watchdog.py           17     17     0%
+argus/argf2/signers.py                      30     30     0%
+argus/argf2/writer.py                      105     69    34%
+argus/chronology.py                         13      9    31%
+argus/compartments.py                      205    205     0%
+argus/config.py                             26      0   100%
+argus/db.py                                 41     27    34%
+argus/deadman.py                            83     11    87%
+argus/duress.py                            130     32    75%
+argus/entities.py                           22      6    73%
+argus/isolation.py                          72     72     0%
+argus/ledger.py                             43      4    91%
+argus/protective.py                         26      8    69%
+argus/sentinel.py                           64     64     0%
+argus/timebase.py                          125     45    64%
+argus/tor.py                               181    181     0%
+argus/vault.py                             125     88    30%
+argus/verify/__init__.py                     0      0   100%
+argus/verify/bundle.py                      52     38    27%
+argus/verify/cli.py                         60     60     0%
+argus/verify/findings.py                    40     14    65%
+argus/verify/record.py                     176     52    70%
+argus/verify/trust.py                       47     33    30%
+argus/verify/verify.py                     404    367     9%
+argus/watcher.py                            79     79     0%
+------------------------------------------------------------
+TOTAL                                     3106   2448    21%
+============================== 18 passed in 5.61s ==============================

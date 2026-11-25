@@ -1,0 +1,22 @@
+{
+  "title": "ARGUS Tag Commit Epoch Rollover and Bridge Vectors",
+  "invariant": "INV-E1 (Forward Secrecy), INV-E2 (Bridge Equivalence)",
+  "master_key_fingerprint": "1111111111111111",
+  "boot_id": "22222222222222222222222222222222",
+  "test_value": "evidence:alibi-device-1049",
+  "epoch_1": {
+    "epoch": 1,
+    "derived_key": "1a8672072a2b0a73f70df46fc90bc14e375b4e7a81779210ed3a446a2999b141",
+    "tag": "bb413b27d680ada9371a37c4ce4e0796"
+  },
+  "epoch_2": {
+    "epoch": 2,
+    "derived_key": "e8998ce8168ac86f84b0bb1b006c99257e52a672509d6e48f882af46c1f74c86",
+    "tag": "6db252f293e9ac6bdddab1569db112da"
+  },
+  "cross_epoch_bridge": {
+    "revealed_key_epoch_1": "1a8672072a2b0a73f70df46fc90bc14e375b4e7a81779210ed3a446a2999b141",
+    "revealed_key_epoch_2": "e8998ce8168ac86f84b0bb1b006c99257e52a672509d6e48f882af46c1f74c86",
+    "equality_verified": true
+  }
+}

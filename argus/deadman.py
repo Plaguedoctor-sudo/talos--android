@@ -14,6 +14,13 @@ DEFAULT_HEARTBEAT_TIMEOUT_SECONDS = 86400 * 2  # 48 hours
 
 
 @dataclass(frozen=True)
+class DeadManPolicy:
+    grace_period_seconds: float = 86400 * 2  # 48 hours
+    allow_offline_wipe: bool = False
+    max_offline_safe_days: float = 7.0
+
+
+@dataclass(frozen=True)
 class HeartbeatStatus:
     status: str
     last_heartbeat_at: str | None
@@ -39,6 +46,7 @@ class DeadMansSwitch:
         config: Config,
         timeout_seconds: float = DEFAULT_HEARTBEAT_TIMEOUT_SECONDS,
         session_key: bytearray | bytes | None = None,
+        policy: DeadManPolicy | None = None,
     ) -> None:
         self.config = config
         self.config.init_directories()
@@ -46,6 +54,27 @@ class DeadMansSwitch:
         self.state_file = self.config.data_dir / "deadman_state.json"
         self.timeout_seconds = timeout_seconds
         self.session_key = session_key
+        self.policy = policy or DeadManPolicy(grace_period_seconds=timeout_seconds, allow_offline_wipe=False)
+
+    def should_wipe(self, now_epoch: float, is_offline: bool = False) -> bool:
+        """Evaluate if destructive wipe is authorized under current invariants.
+
+        Invariant rules:
+        - If elapsed <= timeout_seconds: False (zero false-positives within grace period).
+        - If is_offline and policy.allow_offline_wipe is False: False (offline protection).
+        - Returns True only when (last_checkin + grace < now) AND (not is_offline or policy.allow_offline_wipe).
+        """
+        if not self.state_file.exists():
+            return False
+        with open(self.state_file, "r", encoding="utf-8") as f:
+            state = json.load(f)
+        last_epoch = float(state.get("last_heartbeat_epoch", 0.0))
+        elapsed = now_epoch - last_epoch
+        if elapsed <= self.timeout_seconds:
+            return False
+        if is_offline and not self.policy.allow_offline_wipe:
+            return False
+        return True
 
     def record_heartbeat(self, operator: str | None = None, note: str = "Routine check-in") -> HeartbeatStatus:
         op = operator or self.config.operator_name

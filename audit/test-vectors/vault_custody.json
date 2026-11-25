@@ -1,0 +1,37 @@
+{
+  "title": "ARGUS Vault Content-Addressed Custody Chain Vectors",
+  "invariant": "INV-V1 (Hash-Linked Immutable Custody Chain)",
+  "genesis_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "chain": [
+    {
+      "evidence_id": "EV-001",
+      "seq": 0,
+      "action": "INGEST",
+      "actor": "operator",
+      "timestamp": "2026-11-25T08:00:00Z",
+      "note": "Initial extraction",
+      "prev_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "custody_digest": "17a7970213e4c1e176faf879f5b972df353f9daa463a60524877efcf7a723ae8"
+    },
+    {
+      "evidence_id": "EV-001",
+      "seq": 1,
+      "action": "SEAL",
+      "actor": "crypto-officer",
+      "timestamp": "2026-11-25T08:15:00Z",
+      "note": "Hardware token sealed",
+      "prev_digest": "17a7970213e4c1e176faf879f5b972df353f9daa463a60524877efcf7a723ae8",
+      "custody_digest": "d3500f7a13a83c45fec58ef02db2d3e1b540d0c51e3edcf71029fedd69bc8d79"
+    },
+    {
+      "evidence_id": "EV-001",
+      "seq": 2,
+      "action": "VERIFY",
+      "actor": "auditor",
+      "timestamp": "2026-11-25T09:00:00Z",
+      "note": "Integrity confirmed",
+      "prev_digest": "d3500f7a13a83c45fec58ef02db2d3e1b540d0c51e3edcf71029fedd69bc8d79",
+      "custody_digest": "09a9800c812f11f1fcfc1f52470869fce196b439cecd3c092d80e3b730248e14"
+    }
+  ]
+}
