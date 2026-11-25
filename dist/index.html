@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TALOS / LibreMobile OS</title>
+  <link rel="stylesheet" href="assets/app.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body class="sovereign-mobile-os">
+  <!-- System Status Bar -->
+  <header id="status-bar" class="status-bar">
+    <div class="status-left">
+      <span class="carrier-badge" id="carrier">TALOS 5G-NR</span>
+      <span class="signal-bars" id="signal">●●●●○</span>
+    </div>
+    <div class="status-center">
+      <span class="clock" id="clock">00:00</span>
+    </div>
+    <div class="status-right">
+      <span class="guard-pill active" title="ARGUS Trust Spine Active">ARGUS</span>
+      <span class="battery-pct" id="battery">80%</span>
+      <span class="battery-icon">⚡</span>
+    </div>
+  </header>
+
+  <!-- Main Viewport -->
+  <main id="viewport" class="viewport">
+    <!-- Active Domain & Kill-switches -->
+    <section class="quick-controls card">
+      <div class="control-row">
+        <button class="toggle-btn active" id="btn-kill-mic">🎤 Mic [LIVE]</button>
+        <button class="toggle-btn active" id="btn-kill-cam">📷 Cam [LIVE]</button>
+        <button class="toggle-btn active" id="btn-kill-net">🛡️ Tor [ON]</button>
+        <button class="toggle-btn active" id="btn-power-guard">🔋 80% Cap</button>
+        <button class="toggle-btn active" id="btn-toggle-wifi">📶 Wi-Fi [ON]</button>
+        <button class="toggle-btn" id="btn-toggle-hotspot">📡 Hotspot [OFF]</button>
+        <button class="toggle-btn active" id="btn-toggle-bt">ᛒ BT [ON]</button>
+        <button class="toggle-btn active" id="btn-firewall-arm">🛡️ FW [ARMED]</button>
+        <button class="toggle-btn active" id="btn-privacy-mac">🔒 MAC Alibi</button>
+        <button class="toggle-btn" id="btn-panic-kill">🛑 Panic Cut</button>
+      </div>
+    </section>
+
+    <!-- App Drawer Grid -->
+    <section class="app-drawer">
+      <div class="app-item" data-app="telephony">
+        <div class="app-icon dialer-icon">📞</div>
+        <div class="app-title">Dialer</div>
+      </div>
+      <div class="app-item" data-app="messages">
+        <div class="app-icon sms-icon">💬</div>
+        <div class="app-title">Messages</div>
+      </div>
+      <div class="app-item" data-app="wifi">
+        <div class="app-icon wifi-icon">📶</div>
+        <div class="app-title">Wi-Fi/AP</div>
+      </div>
+      <div class="app-item" data-app="bluetooth">
+        <div class="app-icon bt-icon">ᛒ</div>
+        <div class="app-title">Bluetooth</div>
+      </div>
+      <div class="app-item" data-app="firewall">
+        <div class="app-icon fw-icon">🛡️</div>
+        <div class="app-title">Firewall</div>
+      </div>
+      <div class="app-item" data-app="camera">
+        <div class="app-icon cam-icon">📸</div>
+        <div class="app-title">Camera</div>
+      </div>
+      <div class="app-item" data-app="terminal">
+        <div class="app-icon term-icon">💻</div>
+        <div class="app-title">Terminal</div>
+      </div>
+      <div class="app-item" data-app="waydroid">
+        <div class="app-icon droid-icon">🤖</div>
+        <div class="app-title">Android Box</div>
+      </div>
+      <div class="app-item" data-app="security">
+        <div class="app-icon argus-icon">🔒</div>
+        <div class="app-title">Security</div>
+      </div>
+    </section>
+
+    <!-- Hardware & Telemetry Monitor -->
+    <section class="telemetry-panel card">
+      <h3>Sovereign Subsystem State</h3>
+      <div class="telemetry-grid">
+        <div class="tel-metric">
+          <span class="tel-label">Radio Mode:</span>
+          <span class="tel-val" id="tel-radio">VoLTE / VoNR Ready</span>
+        </div>
+        <div class="tel-metric">
+          <span class="tel-label">Wi-Fi & Hotspot:</span>
+          <span class="tel-val success" id="tel-wifi">WPA3 Station / AP Ready</span>
+        </div>
+        <div class="tel-metric">
+          <span class="tel-label">Bluetooth Subsystem:</span>
+          <span class="tel-val success" id="tel-bt">Privacy MAC Rotated</span>
+        </div>
+        <div class="tel-metric">
+          <span class="tel-label">Egress Firewall:</span>
+          <span class="tel-val success" id="tel-firewall">Deny-by-Default (VPN Enforced)</span>
+        </div>
+        <div class="tel-metric">
+          <span class="tel-label">IIO Accelerometer:</span>
+          <span class="tel-val" id="tel-sensors">Upright (0, -9.8, 0)</span>
+        </div>
+        <div class="tel-metric">
+          <span class="tel-label">dm-verity Rootfs:</span>
+          <span class="tel-val success" id="tel-verity">ENFORCED (Tier 2)</span>
+        </div>
+        <div class="tel-metric">
+          <span class="tel-label">Trust Chain:</span>
+          <span class="tel-val success" id="tel-argus">BLAKE3 Chained</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Layer Shell Dock Marker for Wayland Compositor -->
+  <div id="dock-marker" class="dock-marker">
+    <div class="home-indicator"></div>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

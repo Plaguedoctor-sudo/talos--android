@@ -1,0 +1,10 @@
+[Unit]
+Description=LibreDroid Daily Snapshot Timer
+Documentation=man:lrd-snapshot(8)
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

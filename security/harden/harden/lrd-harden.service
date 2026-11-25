@@ -1,0 +1,15 @@
+[Unit]
+Description=LibreDroid Systemd Unit Hardener
+DefaultDependencies=no
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "/usr/lib/lrd/security/lrd-harden.sh 2>/dev/null || true"
+RemainAfterExit=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

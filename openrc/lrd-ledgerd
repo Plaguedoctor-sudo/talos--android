@@ -1,0 +1,10 @@
+#!/sbin/openrc-run
+description="ARGUS ledger writer"
+command=/usr/bin/ledgerd
+command_background=true
+pidfile=/run/lrd-ledgerd.pid
+start_stop_daemon_args="--make-pidfile"
+respawn_delay=1
+respawn_max=0
+output_log=/var/log/lrd-ledgerd.log
+error_log=/var/log/lrd-ledgerd.log

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# LibreDroid Domain Provisioning Tool (lrd-provision)
+# Sets up isolated rootfs containers and namespaces for sovereign domains.
+# ==============================================================================
+set -euo pipefail
+
+DOMAIN="${1:-workstation}"
+BASE_DIR="/var/lib/libredroid/domains/${DOMAIN}"
+
+echo "[*] Provisioning isolated domain container: $DOMAIN at $BASE_DIR..."
+mkdir -p "$BASE_DIR/usr/bin" "$BASE_DIR/etc" "$BASE_DIR/run" 2>/dev/null || BASE_DIR="/tmp/libredroid/domains/${DOMAIN}"
+mkdir -p "$BASE_DIR/usr/bin" "$BASE_DIR/etc" "$BASE_DIR/run" 2>/dev/null || true
+
+# Provide minimal environment launcher
+cat <<EOF > "$BASE_DIR/usr/bin/env"
+#!/bin/sh
+exec "\$@"
+EOF
+chmod 0755 "$BASE_DIR/usr/bin/env"
+
+echo "✔ Domain '$DOMAIN' provisioned successfully."

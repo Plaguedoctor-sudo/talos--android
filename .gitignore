@@ -1,0 +1,15 @@
+# Build & test caches
+__pycache__/
+*.pyc
+.pytest_cache/
+.deps/
+node_modules/
+build_tmp/
+*.o
+
+# Large generated disk images (500MB+ sparse ext4 release images)
+*.img
+*.iso
+mobile/output/*.img
+mobile/treble/output/*.img
+mobile/release/*.img

@@ -1,0 +1,8 @@
+[Unit]
+Description=LibreDroid Periodic Rootfs Snapshot
+Documentation=man:lrd-snapshot(8)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/lrd-snapshot create "auto-$(date +%%Y%%m%%d-%%H%%M)"
+StandardOutput=journal

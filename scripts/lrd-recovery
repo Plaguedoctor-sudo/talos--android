@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# LibreDroid Bare-Metal Recovery Shell (lrd-recovery)
+# Emergency fallback rescue environment for boot failures, verity corruption, or lockouts.
+# ==============================================================================
+set -uo pipefail
+
+echo "========================================================================"
+echo "    LibreDroid Sovereign Mobile OS — Emergency Recovery Console        "
+echo "========================================================================"
+echo "Entering failsafe maintenance mode..."
+
+STATUS_JSON="/run/lrd/verity.state"
+if [ -f "$STATUS_JSON" ]; then
+    echo "Last known verity state:"
+    cat "$STATUS_JSON"
+fi
+
+echo ""
+echo "Recovery Actions:"
+echo "  1. Check filesystem integrity (fsck)"
+echo "  2. Rollback active A/B slot"
+echo "  3. Clear cache and duress markers"
+echo "  4. Drop to failsafe maintenance shell"
+echo "  5. Reboot system"
+echo ""
+
+ACTION="${1:-shell}"
+case "$ACTION" in
+    rollback)
+        echo "Triggering slot rollback..."
+        if command -v lrd-rollback >/dev/null 2>&1; then
+            lrd-rollback advance 0
+        fi
+        ;;
+    status)
+        echo "Recovery status: READY"
+        ;;
+    shell|*)
+        echo "Recovery environment active."
+        ;;
+esac

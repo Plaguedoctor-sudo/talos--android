@@ -1,0 +1,25 @@
+[Unit]
+Description=LibreDroid Sovereign Defense-Grade Mobile Firewall Daemon
+Documentation=man:lrd-firewall(1)
+After=network-pre.target nftables.service
+Before=network.target
+Wants=nftables.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/lrd-firewalld
+Restart=always
+RestartSec=2s
+KillMode=process
+StandardOutput=journal
+StandardError=journal
+
+# Sandboxing & Hardening
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/run/libredroid /tmp/libredroid
+PrivateTmp=false
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

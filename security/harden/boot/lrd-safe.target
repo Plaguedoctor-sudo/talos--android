@@ -1,0 +1,6 @@
+[Unit]
+Description=LibreDroid Safe Recovery Mode Target
+Requires=basic.target
+Conflicts=rescue.service rescue.target
+After=basic.target
+AllowIsolate=yes

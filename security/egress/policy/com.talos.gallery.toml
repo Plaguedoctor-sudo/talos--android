@@ -1,0 +1,14 @@
+# LibreDroid Egress Policy: Private Photo & Media Vault
+[app]
+id = "com.talos.gallery"
+name = "Private Photo Vault"
+type = "native"
+systemd_unit = "app-gallery.service"
+
+[network]
+mode = "blocked"
+allowed_interfaces = []
+allowed_destinations = []
+dns_policy = "deny"
+ip_accounting = false
+kill_switch = true

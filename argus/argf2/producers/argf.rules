@@ -1,0 +1,5 @@
+## argf class K producer rules. Load with: auditctl -R argf.rules
+-a always,exit -F arch=b64 -S execve -S execveat -k argf_exec
+-a always,exit -F arch=b64 -S connect -k argf_flow
+-a always,exit -F arch=b32 -S execve -S execveat -k argf_exec
+-a always,exit -F arch=b32 -S connect -k argf_flow

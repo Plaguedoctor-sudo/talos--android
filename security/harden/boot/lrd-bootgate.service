@@ -1,0 +1,13 @@
+[Unit]
+Description=LibreDroid Early Boot Gate Verifier
+DefaultDependencies=no
+Before=sysinit.target
+ConditionPathExists=/store/security/tcb-manifest.jsonl
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/lrd-boot-integrity probe
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

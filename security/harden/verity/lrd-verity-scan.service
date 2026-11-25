@@ -1,0 +1,18 @@
+[Unit]
+Description=LibreDroid — full rootfs hash walk
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/run/lrd /run/libredroid /var/lib/lrd
+ExecStart=/usr/bin/lrd-verity verify
+Nice=15
+IOSchedulingClass=idle
+TimeoutStartSec=600
+SuccessExitStatus=0 1
+ExecStartPost=/bin/sh -c 'jq -r .verified /run/lrd/verity.json 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target

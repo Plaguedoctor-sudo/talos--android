@@ -1,0 +1,14 @@
+# LibreDroid Egress Policy: Offline Calculator (Zero-Trust Sandbox)
+[app]
+id = "com.talos.calculator"
+name = "Offline Calculator"
+type = "native"
+systemd_unit = "app-calculator.service"
+
+[network]
+mode = "blocked"
+allowed_interfaces = []
+allowed_destinations = []
+dns_policy = "deny"
+ip_accounting = false
+kill_switch = true

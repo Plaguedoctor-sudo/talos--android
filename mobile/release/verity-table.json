@@ -1,0 +1,7 @@
+{
+  "root_hash": "597b7dd12df391a07f2d97c16afadc0c063d34240943dac607fd97433f73cdb0",
+  "salt": "ab756aa24f39d5e4bce7295fc78fe1526c0ca1697d220dc52784dd3882f2dfe7",
+  "algorithm": "sha256",
+  "data_blocks": 131072,
+  "formatted_at": "2026-11-25T12:22:35Z"
+}

@@ -1,0 +1,24 @@
+{
+  "product": "LibreMobile OS",
+  "version": "1.0-RC",
+  "release_date": "2026-11-17",
+  "license": "GPL-3.0-or-later",
+  "proprietary_vendor_blobs": 0,
+  "supported_devices": [
+    {
+      "codename": "vidofnir",
+      "model": "Volla Phone X23",
+      "tier": "T1",
+      "archive": "libremobile-1.0-rc-vidofnir.tar.xz"
+    },
+    {
+      "codename": "OP5DA6L1",
+      "model": "OnePlus Pad Go",
+      "tier": "T1",
+      "archive": "libremobile-1.0-rc-OP5DA6L1.tar.xz"
+    }
+  ],
+  "rootfs_root_hash": "9ee857dc0b94b3c82f3c441eb42515803f4f51147f2b0617ea51659e3d6cadbb",
+  "verity_algorithm": "sha256",
+  "reproducible": true
+}
