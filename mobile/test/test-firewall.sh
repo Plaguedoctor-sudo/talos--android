@@ -68,16 +68,20 @@ test_policies() {
 assert_ok "Zero-trust per-app network isolation policies (offline calculator/gallery)" test_policies
 
 # 5. Start daemon for live socket interaction
-killall -q lrd-firewalld 2>/dev/null || true
+killall -9 lrd-firewalld 2>/dev/null || pkill -9 -f lrd-firewalld 2>/dev/null || true
 rm -f /tmp/libredroid/firewall.sock /run/libredroid/firewall.sock 2>/dev/null || true
 echo "[*] Spawning lrd-firewalld test instance..."
 "$FIREWALLD" >/dev/null 2>&1 &
 DAEMON_PID=$!
-sleep 0.4
+for _i in $(seq 1 20); do
+    [ -S /run/libredroid/firewall.sock ] || [ -S /tmp/libredroid/firewall.sock ] && break
+    sleep 0.05
+done
 
 cleanup() {
-    kill "$DAEMON_PID" 2>/dev/null || true
+    kill -9 "$DAEMON_PID" 2>/dev/null || true
     wait "$DAEMON_PID" 2>/dev/null || true
+    rm -f /tmp/libredroid/firewall.sock /run/libredroid/firewall.sock 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -96,9 +100,8 @@ assert_ok "Firewall status & telemetry reporting (active, deny-by-default, DoT)"
 test_killswitch() {
     local off_out on_out
     off_out=$("$FIREWALL_CTL" killswitch off)
-    echo "$off_out" | grep -q '"kill_switch":false'
-
-    on_out=$("$FIREWALL_CTL" killswitch on)
+    echo "$off_out" | grep -q '"kill_switch":false' && \
+    on_out=$("$FIREWALL_CTL" killswitch on) && \
     echo "$on_out" | grep -q '"kill_switch":true'
 }
 assert_ok "Anti-leak network kill-switch arm/disarm governor" test_killswitch
