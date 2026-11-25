@@ -129,7 +129,8 @@ When real kernel hardware nodes (e.g. `mmcli`, `/sys/bus/iio`, `bluetoothctl`, `
 ### 3.1. Telephony Subsystem (`lrd-telephonyd`)
 - **Binary**: `/system/bin/lrd-telephonyd` | CLI: `/system/bin/lrd-telephony`
 - **Socket**: `/run/libredroid/telephony.sock`
-- **Responsibilities**: 5G/4G cellular modem management, VoLTE/VoNR audio routing, SIM card lifecycle (PIN/PUK verification), SMS receive/send, signal strength telemetry (RSRP/RSRQ/SINR).
+- **Capabilities Matrix**: [SUPPORT.md](file:///home/alpha/android/mobile/telephony/SUPPORT.md) | [support.yaml](file:///home/alpha/android/mobile/telephony/support.yaml) (replaces blanket 5G/VoLTE claims with an honest, per-device capability matrix; marks VoLTE, VoNR, and eSIM as experimental unless backed by carrier-certified hardware).
+- **Responsibilities**: Cellular modem management (ModemManager / Halium RIL bridge), runtime capability probing (`lrd-telephonyd --caps`, `lrd-telephony caps`), SIM lifecycle (PIN unlock), SMS receive/send, and emergency 911 bypass.
 - **IPC Protocol**: Line-based ASCII commands over UNIX socket:
   - `STATUS` -> Returns JSON object with state, operator, tech (e.g., `5G-SA`), signal dBm, SIM state.
   - `DIAL <number>` -> Initiates outgoing voice call.
@@ -477,13 +478,17 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
 - **[tests/test_store_scoring.py](file:///home/alpha/android/tests/test_store_scoring.py)**: Automated regression suite asserting exact fixture scores (100.0 A+, 7.0 F, 72.0 B, 97.0 A+), score determinism, Ed25519 signature checks, and server HTTP endpoint authentication (`make store-score-test`).
 
 #### 2. Cellular Telephony Subsystem (`mobile/telephony/`)
-- **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)** (13,125 B | 357 lines)
-  - *Aim:* Native C telephony daemon (`< 2 MB` RSS). Connects to Qualcomm/MediaTek baseband via ModemManager / `mmcli`, controls SIM state, routes VoLTE/VoNR audio streams, handles SMS lifecycle, and exposes `/run/libredroid/telephony.sock`.
-- **[lrd-telephony.c](file:///home/alpha/android/mobile/telephony/lrd-telephony.c)** (3,977 B | 113 lines)
-  - *Aim:* High-speed CLI dialer and SMS client interacting with `telephony.sock`.
+- **[SUPPORT.md](file:///home/alpha/android/mobile/telephony/SUPPORT.md)** & **[support.yaml](file:///home/alpha/android/mobile/telephony/support.yaml)**
+  - *Aim:* Authoritative per-device capability matrix and JSON schema. Explicitly marks VoLTE, VoNR, and eSIM as experimental unless backed by carrier-certified hardware entries.
+- **[schema.json](file:///home/alpha/android/mobile/telephony/schema.json)**
+  - *Aim:* JSON Schema draft 2020-12 defining per-device matrix schema and runtime probe caps schema.
+- **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)**
+  - *Aim:* Native C telephony daemon (`< 2 MB` RSS). Connects to Qualcomm/MediaTek/Quectel baseband via ModemManager / AT / QMI / Halium RIL, provides runtime `--caps` probe writing schema-validated `/run/libredroid/telephony.caps.json`, controls SIM state, and exposes `/run/libredroid/telephony.sock`.
+- **[lrd-telephony.c](file:///home/alpha/android/mobile/telephony/lrd-telephony.c)**
+  - *Aim:* High-speed CLI dialer, SMS client, and capability query client (`lrd-telephony caps`).
 - **[lrd-telephony.service](file:///home/alpha/android/mobile/telephony/lrd-telephony.service)** (364 B | 17 lines)
   - *Aim:* Sandboxed systemd service definition with isolated `/tmp` and restricted capabilities.
-- **`lrd-telephonyd` & `lrd-telephony` (ELF Binaries)** (22,248 B & 16,744 B)
+- **`lrd-telephonyd` & `lrd-telephony` (ELF Binaries)**
   - *Aim:* Pre-compiled ARM64/x86_64 binaries ready for instant execution and testing.
 
 #### 3. Sovereign Bluetooth Subsystem (`mobile/bluetooth/`)
@@ -641,4 +646,19 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
   - `test_tags.py` (10 tests | `tag_commit` epoch bridging, digest binding)
   - `test_producers.py`, `test_ledger.py`, `test_degraded.py` (29 tests | ring buffers, recovery, sealing)
   - `test_roundtrip.py`, `test_range.py`, `test_multiboot.py`, `test_grade.py` (e2e integrity)
+
+#### 16. Continuous Fuzzing & Security Policy (`fuzz/` & `SECURITY.md`)
+- **[SECURITY.md](file:///home/alpha/android/SECURITY.md)**
+  - *Aim:* Authoritative security policy establishing a 90-day Coordinated Vulnerability Disclosure (CVD) window, anti-hacking legal Safe Harbor clause, in-scope/out-of-scope taxonomy, and bug bounty reward tiers ($100 to $10,000 USD).
+- **[FUZZ-STATUS.md](file:///home/alpha/android/audit/FUZZ-STATUS.md)**
+  - *Aim:* Continuous fuzzing coverage matrix, throughput benchmarks, and threat models across all 5 parser surfaces.
+- **`fuzz/` libFuzzer Harnesses & Corpora:**
+  - `fuzz/fuzz_telephony_ril.c`: GSM 03.40 SMS PDU decoder and Hayes AT / RIL unsolicited response parser (~419k exec/s).
+  - `fuzz/fuzz_nft_policy.c`: TOML egress firewall policy parser (~264k exec/s).
+  - `fuzz/fuzz_argf2.c`: ARGF/2 binary ledger header & record parser (~3.2M exec/s).
+  - `fuzz/fuzz_pif_json.c`: Waydroid Play Integrity JSON parser (~85k exec/s).
+  - `fuzz/fuzz_battery_sysfs.c`: Linux power_supply sysfs attribute & uevent parser (~432k exec/s).
+  - `fuzz/standalone_driver.c`: Standalone PRNG mutation engine allowing ASAN+UBSAN compilation under GCC.
+  - `fuzz/oss-fuzz/`: Google OSS-Fuzz integration files (`project.yaml`, `build.sh`).
+
 

@@ -131,6 +131,22 @@ test_dual_path_backend() {
 }
 assert_ok "Dual-path telephony driver abstraction (ModemManager + Halium RIL fallback)" test_dual_path_backend
 
+# Test Runtime Modem Capability Probe via CLI & Standalone
+test_caps_probe() {
+    sleep 0.1
+    local out
+    out=$("$TELEPHONY_CTL" caps)
+    echo "$out" | grep -q '"modem_detected": true' && \
+    echo "$out" | grep -q '"data": "supported"' && \
+    echo "$out" | grep -q '"emergency": "supported"'
+}
+assert_ok "Runtime modem capability probe (lrd-telephony caps)" test_caps_probe
+
+test_daemon_caps_flag() {
+    "$TELEPHONYD" --caps | grep -q '"modem_detected": true'
+}
+assert_ok "Modem capability probe CLI flag (lrd-telephonyd --caps)" test_daemon_caps_flag
+
 # Stop daemon cleanly
 cleanup
 trap - EXIT

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://talos-os.org/schemas/telephony-support.schema.json",
+  "title": "TALOS Cellular Telephony Capability & Support Matrix Schema",
+  "description": "JSON Schema draft 2020-12 validating per-device telephony capabilities and runtime probe records.",
+  "oneOf": [
+    { "$ref": "#/$defs/matrix_doc" },
+    { "$ref": "#/$defs/runtime_caps" }
+  ],
+  "$defs": {
+    "capability_level": {
+      "type": "string",
+      "enum": ["supported", "experimental", "unsupported", "untested"]
+    },
+    "firmware_status": {
+      "type": "string",
+      "enum": [
+        "free",
+        "proprietary_signed",
+        "proprietary_unsigned",
+        "replaced",
+        "community_opensource_eval"
+      ]
+    },
+    "device_entry": {
+      "type": "object",
+      "required": [
+        "vendor",
+        "model",
+        "modem_model",
+        "modem_firmware_status",
+        "data",
+        "voice",
+        "sms",
+        "mms",
+        "volte",
+        "vonr",
+        "esim",
+        "emergency",
+        "notes"
+      ],
+      "properties": {
+        "vendor": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "modem_model": {
+          "type": "string"
+        },
+        "modem_firmware_status": {
+          "$ref": "#/$defs/firmware_status"
+        },
+        "data": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "voice": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "sms": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "mms": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "volte": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "vonr": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "esim": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "emergency": {
+          "$ref": "#/$defs/capability_level"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "matrix_doc": {
+      "type": "object",
+      "required": ["version", "devices"],
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/device_entry"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime_caps": {
+      "type": "object",
+      "required": ["modem_detected", "modem_model", "backend", "capabilities"],
+      "properties": {
+        "modem_detected": {
+          "type": "boolean"
+        },
+        "modem_model": {
+          "type": "string"
+        },
+        "backend": {
+          "type": "string"
+        },
+        "firmware_version": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "object",
+          "required": [
+            "data",
+            "voice",
+            "sms",
+            "mms",
+            "volte",
+            "vonr",
+            "esim",
+            "emergency"
+          ],
+          "properties": {
+            "data": { "$ref": "#/$defs/capability_level" },
+            "voice": { "$ref": "#/$defs/capability_level" },
+            "sms": { "$ref": "#/$defs/capability_level" },
+            "mms": { "$ref": "#/$defs/capability_level" },
+            "volte": { "$ref": "#/$defs/capability_level" },
+            "vonr": { "$ref": "#/$defs/capability_level" },
+            "esim": { "$ref": "#/$defs/capability_level" },
+            "emergency": { "$ref": "#/$defs/capability_level" }
+          },
+          "additionalProperties": false
+        },
+        "probe_method": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
         printf("  sms <number> <text>   - Send SMS message\n");
         printf("  sms-list              - View received/stored SMS messages\n");
         printf("  sim-unlock <pin>      - Unlock SIM card\n");
+        printf("  caps                  - Query probed modem capabilities (VoLTE, VoNR, eSIM, data)\n");
         return 1;
     }
 
@@ -101,6 +102,8 @@ int main(int argc, char **argv) {
         snprintf(cmd, sizeof(cmd), "sms-send %s %s", argv[2], msg);
     } else if (strcmp(action, "sms-list") == 0) {
         snprintf(cmd, sizeof(cmd), "sms-list");
+    } else if (strcmp(action, "caps") == 0) {
+        snprintf(cmd, sizeof(cmd), "caps");
     } else if (strcmp(action, "sim-unlock") == 0) {
         if (argc < 3) { fprintf(stderr, "Error: missing PIN\n"); return 1; }
         snprintf(cmd, sizeof(cmd), "sim-unlock %s", argv[2]);

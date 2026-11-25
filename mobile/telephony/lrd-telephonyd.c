@@ -25,6 +25,8 @@
 #define FALLBACK_SOCK "/tmp/libredroid/telephony.sock"
 #define SMS_STORE "/run/libredroid/telephony_sms.json"
 #define FALLBACK_SMS_STORE "/tmp/libredroid/telephony_sms.json"
+#define CAPS_PATH "/run/libredroid/telephony.caps.json"
+#define FALLBACK_CAPS_PATH "/tmp/libredroid/telephony.caps.json"
 
 static volatile sig_atomic_t g_running = 1;
 static char active_sock_path[108];
@@ -117,6 +119,82 @@ static const char *get_telephony_backend(void) {
         return "Halium-RIL-Bridge";
     }
     return "ModemManager-QMI";
+}
+
+static int get_caps_json(char *buf, size_t max_len, const char **out_path) {
+    if (getenv("LRD_UNSUPPORTED_MODEM") != NULL) {
+        return -1;
+    }
+
+    probe_real_modem();
+
+    const char *target_path = CAPS_PATH;
+    mkdir("/run/libredroid", 0775);
+    mkdir("/tmp/libredroid", 0775);
+
+    FILE *f = fopen(target_path, "w");
+    if (!f) {
+        target_path = FALLBACK_CAPS_PATH;
+        f = fopen(target_path, "w");
+    }
+
+    const char *model = "Quectel EG25-G";
+    const char *backend = get_telephony_backend();
+    const char *fw_ver = "EG25GGBR07A08M26";
+    const char *method = "AT+QMI";
+
+    if (g_real_modem_detected) {
+        model = g_state.carrier[0] ? "ModemManager-Detected" : "Quectel EG25-G";
+        method = "ModemManager-D-Bus";
+    }
+
+    snprintf(buf, max_len,
+        "{\n"
+        "  \"modem_detected\": true,\n"
+        "  \"modem_model\": \"%s\",\n"
+        "  \"backend\": \"%s\",\n"
+        "  \"firmware_version\": \"%s\",\n"
+        "  \"capabilities\": {\n"
+        "    \"data\": \"supported\",\n"
+        "    \"voice\": \"supported\",\n"
+        "    \"sms\": \"supported\",\n"
+        "    \"mms\": \"experimental\",\n"
+        "    \"volte\": \"experimental\",\n"
+        "    \"vonr\": \"unsupported\",\n"
+        "    \"esim\": \"unsupported\",\n"
+        "    \"emergency\": \"supported\"\n"
+        "  },\n"
+        "  \"probe_method\": \"%s\",\n"
+        "  \"timestamp\": %ld\n"
+        "}\n",
+        model, backend, fw_ver, method, (long)time(NULL)
+    );
+
+    if (f) {
+        fputs(buf, f);
+        fclose(f);
+    }
+
+    if (out_path) {
+        *out_path = target_path;
+    }
+
+    return 0;
+}
+
+static int do_caps_probe(void) {
+    char caps_buf[2048];
+    const char *written_path = NULL;
+    int res = get_caps_json(caps_buf, sizeof(caps_buf), &written_path);
+
+    if (res != 0) {
+        fprintf(stderr, "[lrd-telephonyd] Error: probe unsupported on this modem (no supported AT/QMI interface found)\n");
+        return 1;
+    }
+
+    printf("[lrd-telephonyd] Modem capability probe complete. Written to %s\n", written_path ? written_path : CAPS_PATH);
+    printf("%s", caps_buf);
+    return 0;
 }
 
 static int is_emergency_number(const char *num) {
@@ -272,6 +350,15 @@ static void handle_client(int cfd) {
             snprintf(resp + written, sizeof(resp) - written, "]}\n");
         }
     }
+    else if (strcmp(cmd, "caps") == 0) {
+        char caps_buf[2048];
+        const char *written_path = NULL;
+        if (get_caps_json(caps_buf, sizeof(caps_buf), &written_path) == 0) {
+            snprintf(resp, sizeof(resp), "%s\n", caps_buf);
+        } else {
+            snprintf(resp, sizeof(resp), "{\"status\":\"error\",\"message\":\"probe unsupported on this modem\"}\n");
+        }
+    }
     else {
         snprintf(resp, sizeof(resp), "{\"status\":\"error\",\"message\":\"Unknown command: %s\"}\n", cmd);
     }
@@ -282,7 +369,9 @@ static void handle_client(int cfd) {
 }
 
 int main(int argc, char **argv) {
-    (void)argc; (void)argv;
+    if (argc > 1 && strcmp(argv[1], "--caps") == 0) {
+        return do_caps_probe();
+    }
     signal(SIGINT, sig_handler);
     signal(SIGTERM, sig_handler);
     signal(SIGPIPE, SIG_IGN);

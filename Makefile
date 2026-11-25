@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render audit-prep store-index store-verify store-score-test
+.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render telephony-matrix-check telephony-matrix-render audit-prep store-index store-verify store-score-test fuzz fuzz-run fuzz-smoke
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -73,6 +73,12 @@ hardware-matrix-check:
 hardware-matrix-render:
 	$(PYTHON) scripts/hardware-matrix.py --render
 
+telephony-matrix-check:
+	$(PYTHON) scripts/telephony-matrix.py --check
+
+telephony-matrix-render:
+	$(PYTHON) scripts/telephony-matrix.py --render
+
 audit-prep:
 	@mkdir -p audit/test-vectors
 	$(PYTHON) scripts/generate-audit-vectors.py
@@ -88,3 +94,40 @@ store-verify:
 
 store-score-test:
 	$(PYTHON) -m pytest tests/test_store_scoring.py -v
+
+FUZZ_TARGETS := fuzz_telephony_ril fuzz_nft_policy fuzz_argf2 fuzz_pif_json fuzz_battery_sysfs
+FUZZ_DIR := fuzz
+FUZZ_OUT := out/fuzz
+CLANG := $(shell which clang 2>/dev/null)
+
+fuzz:
+	@mkdir -p $(FUZZ_OUT)
+	@if [ -n "$(CLANG)" ]; then \
+		echo "[fuzz] Compiling with Clang libFuzzer..."; \
+		for t in $(FUZZ_TARGETS); do \
+			clang -O1 -g -fsanitize=fuzzer,address,undefined -I. $(FUZZ_DIR)/$$t.c -o $(FUZZ_OUT)/$$t; \
+		done; \
+	else \
+		echo "[fuzz] Clang not found; compiling with GCC + ASAN + UBSAN standalone driver..."; \
+		for t in $(FUZZ_TARGETS); do \
+			gcc -O1 -g -fsanitize=address,undefined -DSTANDALONE_FUZZ_DRIVER -I. $(FUZZ_DIR)/$$t.c $(FUZZ_DIR)/standalone_driver.c -o $(FUZZ_OUT)/$$t; \
+		done; \
+	fi
+	@echo "✔ All fuzz harnesses compiled in $(FUZZ_OUT)."
+
+fuzz-run:
+	@if [ -z "$(TARGET)" ]; then \
+		echo "Usage: make fuzz-run TARGET=fuzz_telephony_ril [DURATION=60]"; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(FUZZ_OUT)/$(TARGET)" ]; then \
+		$(MAKE) fuzz; \
+	fi
+	@mkdir -p $(FUZZ_DIR)/corpus/$$(echo $(TARGET) | sed 's/^fuzz_//')
+	@DURATION=$${DURATION:-60}; \
+	echo "[fuzz-run] Running $(TARGET) for $${DURATION}s..."; \
+	$(FUZZ_OUT)/$(TARGET) -max_total_time=$${DURATION} $(FUZZ_DIR)/corpus/$$(echo $(TARGET) | sed 's/^fuzz_//')
+
+fuzz-smoke: fuzz
+	@chmod +x scripts/fuzz-smoke.sh
+	./scripts/fuzz-smoke.sh
