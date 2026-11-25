@@ -37,7 +37,8 @@ TALOS / LibreMobile OS is an open-source, bit-for-bit reproducible mobile operat
    - Zero-trust sensor feeds delivering synthetic white noise to microphones and pitch-black frames to cameras when unauthorized background access occurs.
 4. **ARGUS Mathematical Custody Spine**: Commits every system state change, privilege escalation, and alibi timestamp to an append-only, tamper-evident BLAKE3 arity-4 Merkle ledger (`ARGF/2`) with forward-secret `tag_commit` equality proofs.
 5. **Universal Portability via Project Treble**: Preserves device manufacturer Board Support Packages (BSPs), kernel `/boot`, and vendor drivers (`/vendor`), replacing strictly the generic system partition (`system.img`).
-6. **Transitional Android Compatibility & Open Attestation**: Runs legacy Android applications inside an isolated Waydroid (LXC) container with hardware GPU acceleration. Google Play Integrity spoofing (`pif.json`) is explicitly designated as a **transitional, deprecated shim** ([PIF_ROADMAP.md](file:///home/alpha/android/mobile/waydroid/PIF_ROADMAP.md)) transitioning to open IETF RATS (RFC 9334) and EAT (RFC 9711) hardware attestation ([ATTESTATION.md](file:///home/alpha/android/ATTESTATION.md)). See the consolidated [ROADMAP.md](file:///home/alpha/android/ROADMAP.md).
+7. **Antimonopoly App Distribution & Privacy Scores**: Curates reproducible, free and open-source applications via an independent F-Droid mirror index ([POLICY.md](file:///home/alpha/android/store/POLICY.md)). Every package is deterministically appraised with a 0–100 privacy score and grade (evaluating Exodus tracker signatures, permission sets, reproducibility, and egress policy alignment), signed with detached Ed25519 signatures.
+8. **Transitional Android Compatibility & Open Attestation**: Runs legacy Android applications inside an isolated Waydroid (LXC) container with hardware GPU acceleration. Google Play Integrity spoofing (`pif.json`) is explicitly designated as a **transitional, deprecated shim** ([PIF_ROADMAP.md](file:///home/alpha/android/mobile/waydroid/PIF_ROADMAP.md)) transitioning to open IETF RATS (RFC 9334) and EAT (RFC 9711) hardware attestation ([ATTESTATION.md](file:///home/alpha/android/ATTESTATION.md)). See the consolidated [ROADMAP.md](file:///home/alpha/android/ROADMAP.md).
 
 ---
 
@@ -156,6 +157,7 @@ All 100 automated verification gates pass with 100% success:
 | **Wayland Touch OSK** | [`mobile/test/test-osk.sh`](file:///home/alpha/android/mobile/test/test-osk.sh) | 7 tests | **100% (7/7)** | `lrd-osk` layer-shell virtual keyboard, multi-lingual layouts (QWERTY, QWERTZ, AZERTY, Numeric, Emoji), swipe gestures. |
 | **ARM Translation & Attestation** | [`mobile/test/test-arm-translation.sh`](file:///home/alpha/android/mobile/test/test-arm-translation.sh) | 9 tests | **100% (9/9)** | `lrd-arm-bridge`, `lrd-pif-apply` (`TALOS_PIF_DISABLE=1` opt-out), transitional PIF profile, ARGUS `pif_applied_transitional` event, binfmt_misc hooks. |
 | **Sovereign RATS Verifier** | [`tests/test_rats_verifier.py`](file:///home/alpha/android/tests/test_rats_verifier.py) | 7 tests | **100% (7/7)** | Pure Python stdlib RFC 9334 RATS verifier, RFC 9711 EAT parser, TPM 2.0 quote appraisal (RSA & HMAC), PCR composite digest, golden RIM checks. |
+| **Sovereign Store & Scoring** | [`tests/test_store_scoring.py`](file:///home/alpha/android/tests/test_store_scoring.py) | 7 tests | **100% (7/7)** | Deterministic 0–100 privacy scoring, Exodus tracker penalties, permission restraint, Ed25519 index signature verification, timingSafeEqual API auth. |
 | **ARGUS Tamper & Scope** | [`tests/argx/test_tamper.py`](file:///home/alpha/android/tests/argx/test_tamper.py) | 5 tests | **100% (5/5)** | Header corruption detection (`V-101`), tail truncation (`V-503`), scope omission detection (`V-701`), deterministic JSONL verification. |
 | **`tag_commit` Security** | [`tests/tag/test_tags.py`](file:///home/alpha/android/tests/tag/test_tags.py) | 10 tests | **100% (10/10)** | Epoch mismatch detection (`V-919`), `tag_digest` binding (`V-910`), cross-epoch bridge validation (`V-912`/`V-913`), unbridged local tag warnings (`V-918`), decoy root profile isolation. |
 | **ARGUS Ledger & Degraded**| `tests/producers/*.py` & `tests/e2e/*.py` | 29 tests | **100% (29/29)**| Ring buffer overflow drain, lifecycle records, torn write recovery, multiboot continuity, and strict exit grading. |
@@ -189,6 +191,15 @@ TALOS_PIF_DISABLE=1 make check
 
 # 3. Verify open RATS attestation verifier against RFC 9334 & RFC 9711 vectors
 make test-attestation
+
+# 4. Build, score, and sign the sovereign F-Droid application index
+make store-index
+
+# 5. Cryptographically verify the repository index signature against pinned Ed25519 key
+make store-verify
+
+# 6. Run automated privacy score fixture suite
+make store-score-test
 
 # 2. Run dual-build bit-for-bit reproducibility verification across independent paths
 make reproducible

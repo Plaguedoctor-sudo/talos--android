@@ -1,0 +1,133 @@
+{
+  "repo": {
+    "name": "TALOS Sovereign Commons F-Droid Repository",
+    "description": "Antimonopoly, reproducible mobile application distribution repository",
+    "timestamp": 1764072000,
+    "version": 1,
+    "url": "https://store.talos-project.org/repo"
+  },
+  "packages": [
+    {
+      "id": "com.talos.calculator",
+      "name": "Offline Calculator",
+      "summary": "Privacy-first offline calculator with zero network capabilities",
+      "version_name": "1.4.0",
+      "version_code": 140,
+      "license": "GPL-3.0-or-later",
+      "updated_date": "2026-11-15",
+      "reproducible": true,
+      "permissions": [],
+      "detected_trackers": [],
+      "egress_policy": "com.talos.calculator.toml"
+    },
+    {
+      "id": "com.talos.gallery",
+      "name": "Private Photo Vault",
+      "summary": "Encrypted local photo gallery and media manager",
+      "version_name": "2.1.2",
+      "version_code": 212,
+      "license": "GPL-3.0-or-later",
+      "updated_date": "2026-11-10",
+      "reproducible": true,
+      "permissions": ["READ_MEDIA_IMAGES", "READ_MEDIA_VIDEO"],
+      "detected_trackers": [],
+      "egress_policy": "com.talos.gallery.toml"
+    },
+    {
+      "id": "org.fdroid.fdroid",
+      "name": "F-Droid App Store",
+      "summary": "Free and Open Source Android App Repository Client",
+      "version_name": "1.21.0",
+      "version_code": 1021000,
+      "license": "GPL-3.0-or-later",
+      "updated_date": "2026-10-28",
+      "reproducible": true,
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "REQUEST_INSTALL_PACKAGES"],
+      "detected_trackers": [],
+      "egress_policy": "org.fdroid.fdroid.toml"
+    },
+    {
+      "id": "org.mozilla.firefox",
+      "name": "Firefox Mobile (Hardened)",
+      "summary": "Independent, privacy-focused open source web browser",
+      "version_name": "132.0.2",
+      "version_code": 1320200,
+      "license": "MPL-2.0",
+      "updated_date": "2026-11-20",
+      "reproducible": true,
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "CAMERA", "RECORD_AUDIO"],
+      "detected_trackers": ["11"],
+      "egress_policy": "org.mozilla.firefox.toml"
+    },
+    {
+      "id": "ch.protonmail.vpn",
+      "name": "Proton VPN",
+      "summary": "High-speed Swiss VPN protecting online privacy",
+      "version_name": "5.3.1",
+      "version_code": 5310,
+      "license": "GPL-3.0-or-later",
+      "updated_date": "2026-10-15",
+      "reproducible": true,
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"],
+      "detected_trackers": ["11"],
+      "egress_policy": "ch.protonmail.vpn.toml"
+    },
+    {
+      "id": "io.waydroid.container",
+      "name": "Waydroid Android Container Box",
+      "summary": "Isolated LXC container runtime for mobile Android compatibility",
+      "version_name": "1.4.3",
+      "version_code": 1430,
+      "license": "GPL-3.0-or-later",
+      "updated_date": "2026-11-05",
+      "reproducible": true,
+      "permissions": ["INTERNET"],
+      "detected_trackers": [],
+      "egress_policy": "io.waydroid.container.toml"
+    },
+    {
+      "id": "test.fixture.clean",
+      "name": "Clean Sovereign Utility",
+      "summary": "Fixture application with 0 trackers, offline egress, and reproducible build",
+      "version_name": "1.0.0",
+      "version_code": 100,
+      "license": "Apache-2.0",
+      "updated_date": "2026-11-22",
+      "reproducible": true,
+      "permissions": [],
+      "detected_trackers": [],
+      "egress_policy": "com.talos.calculator.toml"
+    },
+    {
+      "id": "test.fixture.trackers",
+      "name": "Surveillance Commercial Ad App",
+      "summary": "Fixture app containing AdMob, AppsFlyer, and Facebook Analytics",
+      "version_name": "3.5.0",
+      "version_code": 350,
+      "license": "Apache-2.0",
+      "updated_date": "2026-08-01",
+      "reproducible": false,
+      "permissions": ["INTERNET", "ACCESS_FINE_LOCATION", "READ_CONTACTS", "CAMERA", "RECORD_AUDIO", "READ_PHONE_STATE"],
+      "detected_trackers": ["1", "5", "6"],
+      "egress_policy": null
+    },
+    {
+      "id": "test.fixture.waiver",
+      "name": "Waivered FOSS Utility",
+      "summary": "Fixture app with non-reproducible build waiver and self-hosted Sentry",
+      "version_name": "2.0.0",
+      "version_code": 200,
+      "license": "MIT",
+      "updated_date": "2026-11-01",
+      "reproducible": false,
+      "reproducible_waiver": {
+        "reason": "Upstream Gradle toolchain non-determinism; patch in progress",
+        "granted_by": ["maintainer1", "maintainer2"],
+        "expires": "2027-05-01"
+      },
+      "permissions": ["INTERNET"],
+      "detected_trackers": ["11"],
+      "egress_policy": "org.mozilla.firefox.toml"
+    }
+  ]
+}

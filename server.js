@@ -313,6 +313,34 @@ const server = http.createServer((req, res) => {
     }));
   }
 
+  // Store Index Distribution Endpoint (timingSafeEqual Token Authenticated)
+  if (url.pathname === '/api/store/index' && req.method === 'GET') {
+    if (!verifyToken(req)) {
+      emitBridgeEvent('STORE_UNAUTHORIZED', {
+        url: url.pathname,
+        origin,
+        remote
+      });
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: 'Unauthorized: missing or invalid bridge token' }));
+    }
+
+    const indexPath = path.join(__dirname, 'store', 'index', 'index.json');
+    if (!fs.existsSync(indexPath)) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: 'Store index not found. Run make store-index' }));
+    }
+
+    try {
+      const data = fs.readFileSync(indexPath, 'utf-8');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(data);
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: e.message }));
+    }
+  }
+
   // Privileged Command Execution Endpoint
   if (url.pathname === '/api/host/exec/sync' && req.method === 'POST') {
     if (!verifyToken(req)) {

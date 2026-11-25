@@ -1,0 +1,533 @@
+{
+  "packages": [
+    {
+      "detected_trackers": [
+        "11"
+      ],
+      "egress_policy": "ch.protonmail.vpn.toml",
+      "id": "ch.protonmail.vpn",
+      "license": "GPL-3.0-or-later",
+      "name": "Proton VPN",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 20.0,
+            "status": "verified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "vpn_bootstrap",
+            "policy_file": "ch.protonmail.vpn.toml",
+            "score": 8.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-10-15",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [],
+            "max": 20.0,
+            "score": 20.0
+          },
+          "tracker_absence": {
+            "details": [
+              {
+                "category": "crash_reporting",
+                "deduction": 10.0,
+                "id": "11",
+                "name": "Sentry"
+              }
+            ],
+            "detected_count": 1,
+            "max": 35.0,
+            "score": 25.0
+          }
+        },
+        "grade": "B",
+        "score_version": "1.0.0",
+        "total_score": 83.0
+      },
+      "reproducible": true,
+      "summary": "High-speed Swiss VPN protecting online privacy",
+      "updated_date": "2026-10-15",
+      "version_code": 5310,
+      "version_name": "5.3.1"
+    },
+    {
+      "detected_trackers": [],
+      "egress_policy": "com.talos.calculator.toml",
+      "id": "com.talos.calculator",
+      "license": "GPL-3.0-or-later",
+      "name": "Offline Calculator",
+      "permissions": [],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 20.0,
+            "status": "verified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "blocked",
+            "policy_file": "com.talos.calculator.toml",
+            "score": 15.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-11-15",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [],
+            "max": 20.0,
+            "score": 20.0
+          },
+          "tracker_absence": {
+            "details": [],
+            "detected_count": 0,
+            "max": 35.0,
+            "score": 35.0
+          }
+        },
+        "grade": "A+",
+        "score_version": "1.0.0",
+        "total_score": 100.0
+      },
+      "reproducible": true,
+      "summary": "Privacy-first offline calculator with zero network capabilities",
+      "updated_date": "2026-11-15",
+      "version_code": 140,
+      "version_name": "1.4.0"
+    },
+    {
+      "detected_trackers": [],
+      "egress_policy": "com.talos.gallery.toml",
+      "id": "com.talos.gallery",
+      "license": "GPL-3.0-or-later",
+      "name": "Private Photo Vault",
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO"
+      ],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 20.0,
+            "status": "verified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "blocked",
+            "policy_file": "com.talos.gallery.toml",
+            "score": 15.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-11-10",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [],
+            "max": 20.0,
+            "score": 20.0
+          },
+          "tracker_absence": {
+            "details": [],
+            "detected_count": 0,
+            "max": 35.0,
+            "score": 35.0
+          }
+        },
+        "grade": "A+",
+        "score_version": "1.0.0",
+        "total_score": 100.0
+      },
+      "reproducible": true,
+      "summary": "Encrypted local photo gallery and media manager",
+      "updated_date": "2026-11-10",
+      "version_code": 212,
+      "version_name": "2.1.2"
+    },
+    {
+      "detected_trackers": [],
+      "egress_policy": "io.waydroid.container.toml",
+      "id": "io.waydroid.container",
+      "license": "GPL-3.0-or-later",
+      "name": "Waydroid Android Container Box",
+      "permissions": [
+        "INTERNET"
+      ],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 20.0,
+            "status": "verified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "tunnel_only",
+            "policy_file": "io.waydroid.container.toml",
+            "score": 12.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-11-05",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [],
+            "max": 20.0,
+            "score": 20.0
+          },
+          "tracker_absence": {
+            "details": [],
+            "detected_count": 0,
+            "max": 35.0,
+            "score": 35.0
+          }
+        },
+        "grade": "A+",
+        "score_version": "1.0.0",
+        "total_score": 97.0
+      },
+      "reproducible": true,
+      "summary": "Isolated LXC container runtime for mobile Android compatibility",
+      "updated_date": "2026-11-05",
+      "version_code": 1430,
+      "version_name": "1.4.3"
+    },
+    {
+      "detected_trackers": [],
+      "egress_policy": "org.fdroid.fdroid.toml",
+      "id": "org.fdroid.fdroid",
+      "license": "GPL-3.0-or-later",
+      "name": "F-Droid App Store",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "REQUEST_INSTALL_PACKAGES"
+      ],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 20.0,
+            "status": "verified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "tunnel_only",
+            "policy_file": "org.fdroid.fdroid.toml",
+            "score": 12.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-10-28",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [],
+            "max": 20.0,
+            "score": 20.0
+          },
+          "tracker_absence": {
+            "details": [],
+            "detected_count": 0,
+            "max": 35.0,
+            "score": 35.0
+          }
+        },
+        "grade": "A+",
+        "score_version": "1.0.0",
+        "total_score": 97.0
+      },
+      "reproducible": true,
+      "summary": "Free and Open Source Android App Repository Client",
+      "updated_date": "2026-10-28",
+      "version_code": 1021000,
+      "version_name": "1.21.0"
+    },
+    {
+      "detected_trackers": [
+        "11"
+      ],
+      "egress_policy": "org.mozilla.firefox.toml",
+      "id": "org.mozilla.firefox",
+      "license": "MPL-2.0",
+      "name": "Firefox Mobile (Hardened)",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "CAMERA",
+        "RECORD_AUDIO"
+      ],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 20.0,
+            "status": "verified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "tunnel_only",
+            "policy_file": "org.mozilla.firefox.toml",
+            "score": 12.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-11-20",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [
+              "CAMERA",
+              "RECORD_AUDIO"
+            ],
+            "max": 20.0,
+            "score": 12.0
+          },
+          "tracker_absence": {
+            "details": [
+              {
+                "category": "crash_reporting",
+                "deduction": 10.0,
+                "id": "11",
+                "name": "Sentry"
+              }
+            ],
+            "detected_count": 1,
+            "max": 35.0,
+            "score": 25.0
+          }
+        },
+        "grade": "B",
+        "score_version": "1.0.0",
+        "total_score": 79.0
+      },
+      "reproducible": true,
+      "summary": "Independent, privacy-focused open source web browser",
+      "updated_date": "2026-11-20",
+      "version_code": 1320200,
+      "version_name": "132.0.2"
+    },
+    {
+      "detected_trackers": [],
+      "egress_policy": "com.talos.calculator.toml",
+      "id": "test.fixture.clean",
+      "license": "Apache-2.0",
+      "name": "Clean Sovereign Utility",
+      "permissions": [],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 20.0,
+            "status": "verified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "blocked",
+            "policy_file": "com.talos.calculator.toml",
+            "score": 15.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-11-22",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [],
+            "max": 20.0,
+            "score": 20.0
+          },
+          "tracker_absence": {
+            "details": [],
+            "detected_count": 0,
+            "max": 35.0,
+            "score": 35.0
+          }
+        },
+        "grade": "A+",
+        "score_version": "1.0.0",
+        "total_score": 100.0
+      },
+      "reproducible": true,
+      "summary": "Fixture application with 0 trackers, offline egress, and reproducible build",
+      "updated_date": "2026-11-22",
+      "version_code": 100,
+      "version_name": "1.0.0"
+    },
+    {
+      "detected_trackers": [
+        "1",
+        "5",
+        "6"
+      ],
+      "egress_policy": null,
+      "id": "test.fixture.trackers",
+      "license": "Apache-2.0",
+      "name": "Surveillance Commercial Ad App",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "READ_CONTACTS",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_PHONE_STATE"
+      ],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 0.0,
+            "status": "unverified"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "none",
+            "policy_file": null,
+            "score": 0.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-08-01",
+            "max": 10.0,
+            "score": 7.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [
+              "ACCESS_FINE_LOCATION",
+              "CAMERA",
+              "READ_CONTACTS",
+              "READ_PHONE_STATE",
+              "RECORD_AUDIO"
+            ],
+            "max": 20.0,
+            "score": 0.0
+          },
+          "tracker_absence": {
+            "details": [
+              {
+                "category": "advertisement",
+                "deduction": 25.0,
+                "id": "1",
+                "name": "Google AdMob"
+              },
+              {
+                "category": "profiling",
+                "deduction": 25.0,
+                "id": "5",
+                "name": "Facebook Analytics"
+              },
+              {
+                "category": "profiling",
+                "deduction": 25.0,
+                "id": "6",
+                "name": "AppsFlyer"
+              }
+            ],
+            "detected_count": 3,
+            "max": 35.0,
+            "score": 0.0
+          }
+        },
+        "grade": "F",
+        "score_version": "1.0.0",
+        "total_score": 7.0
+      },
+      "reproducible": false,
+      "summary": "Fixture app containing AdMob, AppsFlyer, and Facebook Analytics",
+      "updated_date": "2026-08-01",
+      "version_code": 350,
+      "version_name": "3.5.0"
+    },
+    {
+      "detected_trackers": [
+        "11"
+      ],
+      "egress_policy": "org.mozilla.firefox.toml",
+      "id": "test.fixture.waiver",
+      "license": "MIT",
+      "name": "Waivered FOSS Utility",
+      "permissions": [
+        "INTERNET"
+      ],
+      "privacy_score": {
+        "breakdown": {
+          "build_reproducibility": {
+            "max": 20.0,
+            "score": 5.0,
+            "status": "waiver_granted"
+          },
+          "egress_alignment": {
+            "max": 15.0,
+            "mode": "tunnel_only",
+            "policy_file": "org.mozilla.firefox.toml",
+            "score": 12.0
+          },
+          "maintenance_recency": {
+            "last_updated": "2026-11-01",
+            "max": 10.0,
+            "score": 10.0
+          },
+          "permission_restraint": {
+            "intrusive_permissions": [],
+            "max": 20.0,
+            "score": 20.0
+          },
+          "tracker_absence": {
+            "details": [
+              {
+                "category": "crash_reporting",
+                "deduction": 10.0,
+                "id": "11",
+                "name": "Sentry"
+              }
+            ],
+            "detected_count": 1,
+            "max": 35.0,
+            "score": 25.0
+          }
+        },
+        "grade": "B",
+        "score_version": "1.0.0",
+        "total_score": 72.0
+      },
+      "reproducible": false,
+      "reproducible_waiver": {
+        "expires": "2027-05-01",
+        "granted_by": [
+          "maintainer1",
+          "maintainer2"
+        ],
+        "reason": "Upstream Gradle toolchain non-determinism; patch in progress"
+      },
+      "summary": "Fixture app with non-reproducible build waiver and self-hosted Sentry",
+      "updated_date": "2026-11-01",
+      "version_code": 200,
+      "version_name": "2.0.0"
+    }
+  ],
+  "repo": {
+    "description": "Antimonopoly, reproducible mobile application distribution repository",
+    "name": "TALOS Sovereign Commons F-Droid Repository",
+    "timestamp": 1764072000,
+    "url": "https://store.talos-project.org/repo",
+    "version": 1
+  },
+  "score_metadata": {
+    "engine": "TALOS Sovereign Privacy Scorer",
+    "reference_date": "2026-11-25",
+    "score_version": "1.0.0",
+    "total_packages": 9
+  }
+}

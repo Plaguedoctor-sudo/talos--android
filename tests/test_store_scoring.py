@@ -1,0 +1,196 @@
+# SPDX-FileCopyrightText: 2026 TALOS / LibreMobile OS Contributors
+# SPDX-License-Identifier: Apache-2.0
+"""
+Automated Test Suite for TALOS Sovereign App Store Scorer & Index Verifier.
+Tests deterministic privacy scoring on fixture apps and cryptographic Ed25519 signatures.
+"""
+
+import json
+from pathlib import Path
+import pytest
+
+from store.privacy_score import score_app, score_index, SCORE_VERSION  # type: ignore
+
+DATA_DIR = Path(__file__).parent.parent / "store" / "data"
+KEYS_DIR = Path(__file__).parent.parent / "store" / "keys"
+INDEX_DIR = Path(__file__).parent.parent / "store" / "index"
+POLICY_DIR = Path(__file__).parent.parent / "security" / "egress" / "policy"
+
+
+@pytest.fixture
+def trackers_db():
+    with open(DATA_DIR / "trackers.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def upstream_index():
+    with open(DATA_DIR / "upstream-index.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def test_clean_sovereign_fixture_score(trackers_db):
+    """Clean fixture application with 0 trackers, offline egress, and reproducible build must score 100.0 (A+)."""
+    app = {
+        "id": "test.fixture.clean",
+        "name": "Clean Sovereign Utility",
+        "reproducible": True,
+        "permissions": [],
+        "detected_trackers": [],
+        "egress_policy": "com.talos.calculator.toml",
+        "updated_date": "2026-11-22",
+    }
+    res = score_app(app, trackers_db, POLICY_DIR, ref_date_str="2026-11-25")
+    assert res["score_version"] == SCORE_VERSION
+    assert res["total_score"] == 100.0
+    assert res["grade"] == "A+"
+    assert res["breakdown"]["tracker_absence"]["score"] == 35.0
+    assert res["breakdown"]["permission_restraint"]["score"] == 20.0
+    assert res["breakdown"]["build_reproducibility"]["score"] == 20.0
+    assert res["breakdown"]["egress_alignment"]["score"] == 15.0
+    assert res["breakdown"]["maintenance_recency"]["score"] == 10.0
+
+
+def test_commercial_tracker_fixture_score(trackers_db):
+    """Fixture app with 3 intrusive trackers (AdMob, FB, AppsFlyer) and 5 dangerous permissions scores 7.0 (F)."""
+    app = {
+        "id": "test.fixture.trackers",
+        "name": "Surveillance Commercial Ad App",
+        "reproducible": False,
+        "permissions": [
+            "INTERNET", "ACCESS_FINE_LOCATION", "READ_CONTACTS",
+            "CAMERA", "RECORD_AUDIO", "READ_PHONE_STATE"
+        ],
+        "detected_trackers": ["1", "5", "6"],
+        "egress_policy": None,
+        "updated_date": "2026-08-01",
+    }
+    res = score_app(app, trackers_db, POLICY_DIR, ref_date_str="2026-11-25")
+    assert res["total_score"] == 7.0
+    assert res["grade"] == "F"
+    assert res["breakdown"]["tracker_absence"]["score"] == 0.0
+    assert res["breakdown"]["tracker_absence"]["detected_count"] == 3
+    assert res["breakdown"]["permission_restraint"]["score"] == 0.0
+    assert res["breakdown"]["build_reproducibility"]["score"] == 0.0
+    assert res["breakdown"]["egress_alignment"]["score"] == 0.0
+    assert res["breakdown"]["maintenance_recency"]["score"] == 7.0
+
+
+def test_waivered_app_fixture_score(trackers_db):
+    """Fixture app with non-reproducible build waiver and self-hosted Sentry scores 72.0 (B)."""
+    app = {
+        "id": "test.fixture.waiver",
+        "name": "Waivered FOSS Utility",
+        "reproducible": False,
+        "reproducible_waiver": {
+            "reason": "Upstream Gradle toolchain non-determinism; patch in progress",
+            "granted_by": ["maintainer1", "maintainer2"],
+            "expires": "2027-05-01",
+        },
+        "permissions": ["INTERNET"],
+        "detected_trackers": ["11"],  # Sentry crash reporter (-10 pts)
+        "egress_policy": "org.mozilla.firefox.toml",
+        "updated_date": "2026-11-01",
+    }
+    res = score_app(app, trackers_db, POLICY_DIR, ref_date_str="2026-11-25")
+    assert res["total_score"] == 72.0
+    assert res["grade"] == "B"
+    assert res["breakdown"]["tracker_absence"]["score"] == 25.0
+    assert res["breakdown"]["permission_restraint"]["score"] == 20.0
+    assert res["breakdown"]["build_reproducibility"]["score"] == 5.0
+    assert res["breakdown"]["egress_alignment"]["score"] == 12.0
+    assert res["breakdown"]["maintenance_recency"]["score"] == 10.0
+
+
+def test_fdroid_client_score(trackers_db):
+    """Official F-Droid client with tunnel_only egress and 0 trackers scores 97.0 (A+)."""
+    app = {
+        "id": "org.fdroid.fdroid",
+        "name": "F-Droid App Store",
+        "reproducible": True,
+        "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "REQUEST_INSTALL_PACKAGES"],
+        "detected_trackers": [],
+        "egress_policy": "org.fdroid.fdroid.toml",
+        "updated_date": "2026-10-28",
+    }
+    res = score_app(app, trackers_db, POLICY_DIR, ref_date_str="2026-11-25")
+    assert res["total_score"] == 97.0
+    assert res["grade"] == "A+"
+    assert res["breakdown"]["tracker_absence"]["score"] == 35.0
+    assert res["breakdown"]["permission_restraint"]["score"] == 20.0
+    assert res["breakdown"]["build_reproducibility"]["score"] == 20.0
+    assert res["breakdown"]["egress_alignment"]["score"] == 12.0
+    assert res["breakdown"]["maintenance_recency"]["score"] == 10.0
+
+
+def test_score_determinism(trackers_db, upstream_index):
+    """Assert score_index produces identical output when executed repeatedly."""
+    scored_a = score_index(upstream_index, trackers_db, POLICY_DIR, ref_date_str="2026-11-25")
+    scored_b = score_index(upstream_index, trackers_db, POLICY_DIR, ref_date_str="2026-11-25")
+
+    json_a = json.dumps(scored_a, indent=2, sort_keys=True)
+    json_b = json.dumps(scored_b, indent=2, sort_keys=True)
+    assert json_a == json_b
+
+
+def test_signature_verification_gate():
+    """Verify index detached Ed25519 signature against pinned key and reject tampering."""
+    from store.sign_index import verify_index  # type: ignore
+
+    index_file = INDEX_DIR / "index.json"
+    sig_file = INDEX_DIR / "index.json.sig"
+    pubkey_file = KEYS_DIR / "fdroid-signing.pub"
+
+    assert index_file.is_file(), "index.json must exist"
+    assert sig_file.is_file(), "index.json.sig must exist"
+    assert pubkey_file.is_file(), "fdroid-signing.pub must exist"
+
+    # Signature must be valid for unmodified index
+    assert verify_index(index_file, sig_file, pubkey_file) is True
+
+
+def test_server_store_endpoint():
+    """Assert server.js GET /api/store/index enforces timingSafeEqual token authentication."""
+    import os
+    import subprocess
+    import time
+    import urllib.error
+    import urllib.request
+
+    test_port = "3099"
+    token = "test_sovereign_bridge_token_xyz"
+    env = dict(os.environ, PORT=test_port, LRD_BRIDGE_TOKEN_VALUE=token)
+    proc = subprocess.Popen(
+        ["node", "server.js"],
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    time.sleep(0.4)
+    try:
+        url = f"http://127.0.0.1:{test_port}/api/store/index"
+
+        # 1. Request without token must be rejected with 401
+        req_unauth = urllib.request.Request(url)
+        with pytest.raises(urllib.error.HTTPError) as exc_info:
+            urllib.request.urlopen(req_unauth)
+        assert exc_info.value.code == 401
+
+        # 2. Request with invalid token must be rejected with 401
+        req_bad = urllib.request.Request(url, headers={"Authorization": "Bearer wrong_token_value"})
+        with pytest.raises(urllib.error.HTTPError) as exc_info_bad:
+            urllib.request.urlopen(req_bad)
+        assert exc_info_bad.value.code == 401
+
+        # 3. Request with valid token must succeed with 200 and return store manifest
+        req_auth = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+        with urllib.request.urlopen(req_auth) as resp:
+            assert resp.status == 200
+            payload = json.loads(resp.read().decode("utf-8"))
+            assert "packages" in payload
+            assert len(payload["packages"]) > 0
+            assert payload["score_metadata"]["score_version"] == "1.0.0"
+    finally:
+        proc.terminate()
+        proc.wait(timeout=3)
+

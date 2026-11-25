@@ -1,0 +1,109 @@
+{
+  "_meta": {
+    "source": "Exodus Privacy Tracker Signatures Database",
+    "license": "CC-BY-SA-4.0",
+    "spdx_identifier": "CC-BY-SA-4.0",
+    "version": "2026.11.20",
+    "attribution": "Exodus Privacy (https://reports.exodus-privacy.eu.org/)"
+  },
+  "trackers": {
+    "1": {
+      "id": 1,
+      "name": "Google AdMob",
+      "category": "advertisement",
+      "code_signature": "com.google.android.gms.ads",
+      "network_signature": "googleads.g.doubleclick.net"
+    },
+    "2": {
+      "id": 2,
+      "name": "Google Firebase Analytics",
+      "category": "analytics",
+      "code_signature": "com.google.firebase.analytics",
+      "network_signature": "app-measurement.com"
+    },
+    "3": {
+      "id": 3,
+      "name": "Google Firebase Crashlytics",
+      "category": "crash_reporting",
+      "code_signature": "com.google.firebase.crashlytics",
+      "network_signature": "crashlytics.com"
+    },
+    "4": {
+      "id": 4,
+      "name": "Facebook Audience Network",
+      "category": "advertisement",
+      "code_signature": "com.facebook.ads",
+      "network_signature": "an.facebook.com"
+    },
+    "5": {
+      "id": 5,
+      "name": "Facebook Analytics",
+      "category": "profiling",
+      "code_signature": "com.facebook.appevents",
+      "network_signature": "graph.facebook.com"
+    },
+    "6": {
+      "id": 6,
+      "name": "AppsFlyer",
+      "category": "profiling",
+      "code_signature": "com.appsflyer",
+      "network_signature": "t.appsflyer.com"
+    },
+    "7": {
+      "id": 7,
+      "name": "Adjust",
+      "category": "profiling",
+      "code_signature": "com.adjust.sdk",
+      "network_signature": "app.adjust.com"
+    },
+    "8": {
+      "id": 8,
+      "name": "Unity3D Ads",
+      "category": "advertisement",
+      "code_signature": "com.unity3d.ads",
+      "network_signature": "unityads.unity3d.com"
+    },
+    "9": {
+      "id": 9,
+      "name": "AppLovin",
+      "category": "advertisement",
+      "code_signature": "com.applovin",
+      "network_signature": "a.applovin.com"
+    },
+    "10": {
+      "id": 10,
+      "name": "Mixpanel",
+      "category": "analytics",
+      "code_signature": "com.mixpanel.android",
+      "network_signature": "api.mixpanel.com"
+    },
+    "11": {
+      "id": 11,
+      "name": "Sentry",
+      "category": "crash_reporting",
+      "code_signature": "io.sentry",
+      "network_signature": "sentry.io"
+    },
+    "12": {
+      "id": 12,
+      "name": "Bugsnag",
+      "category": "crash_reporting",
+      "code_signature": "com.bugsnag.android",
+      "network_signature": "notify.bugsnag.com"
+    },
+    "13": {
+      "id": 13,
+      "name": "Kochava",
+      "category": "profiling",
+      "code_signature": "com.kochava.tracker",
+      "network_signature": "control.kochava.com"
+    },
+    "14": {
+      "id": 14,
+      "name": "Matomo Mobile Analytics",
+      "category": "analytics",
+      "code_signature": "org.matomo.sdk",
+      "network_signature": "matomo.org"
+    }
+  }
+}

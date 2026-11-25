@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render audit-prep
+.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render audit-prep store-index store-verify store-score-test
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -77,3 +77,14 @@ audit-prep:
 	@mkdir -p audit/test-vectors
 	$(PYTHON) scripts/generate-audit-vectors.py
 	$(PYTHON) -m pytest tests/test_argf2_properties.py tests/test_duress_properties.py tests/test_deadman_properties.py tests/test_audit_vectors.py --cov=argus --cov-report=term | tee audit/coverage-report.txt
+
+store-index:
+	@chmod +x store/build-index.sh
+	./store/build-index.sh
+
+store-verify:
+	@chmod +x store/verify-index.sh
+	./store/verify-index.sh
+
+store-score-test:
+	$(PYTHON) -m pytest tests/test_store_scoring.py -v

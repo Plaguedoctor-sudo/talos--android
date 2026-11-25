@@ -466,6 +466,16 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
   - `vectors/`: Committed static JSON test vectors for valid, tampered PCR, expired nonce, and untrusted AK scenarios.
   - Tested by `tests/test_rats_verifier.py` (`make test-attestation`).
 
+#### 1.6. Antimonopoly App Distribution & Privacy Scoring (`store/` & `tests/test_store_scoring.py`)
+- **[store/POLICY.md](file:///home/alpha/android/store/POLICY.md)**: Repository inclusion criteria enforcing FOSS licenses (OSI/FSF), reproducible builds (or signed time-limited waivers), absolute prohibition of commercial advertising/profiling SDKs, and mandatory declared egress policies matching `security/egress/policy/*.toml`.
+- **[store/privacy-score.py](file:///home/alpha/android/store/privacy-score.py)**: Deterministic 0–100 privacy scoring algorithm (`SCORE_VERSION = "1.0.0"`) computing weighted metrics across tracker absence (35%), permission restraint (20%), build reproducibility (20%), egress policy alignment (15%), and maintenance recency (10%).
+- **[store/data/trackers.json](file:///home/alpha/android/store/data/trackers.json)**: Vendored Exodus Privacy signature catalog attributing 14 prominent tracker signatures across advertising, analytics, profiling, and crash reporting.
+- **[store/data/upstream-index.json](file:///home/alpha/android/store/data/upstream-index.json)**: Pinned hermetic upstream mirror index snapshot containing curated sovereign utilities, browsers, and fixture test apps.
+- **[store/sign-index.py](file:///home/alpha/android/store/sign-index.py)**: Ed25519 signing and verification utility generating detached signatures (`index.json.sig`) bound to pinned keys in `store/keys/`.
+- **[store/build-index.sh](file:///home/alpha/android/store/build-index.sh)** & **[store/verify-index.sh](file:///home/alpha/android/store/verify-index.sh)**: Automated build and verification pipeline for the repository manifest (`make store-index` and `make store-verify`).
+- **Web Bridge & UI Integration**: `server.js` exposes `GET /api/store/index` protected by `timingSafeEqual` bearer token authentication. The `dist/` web shell renders a native store panel displaying package metadata, privacy scores, and color-coded badges (`A+` through `F`).
+- **[tests/test_store_scoring.py](file:///home/alpha/android/tests/test_store_scoring.py)**: Automated regression suite asserting exact fixture scores (100.0 A+, 7.0 F, 72.0 B, 97.0 A+), score determinism, Ed25519 signature checks, and server HTTP endpoint authentication (`make store-score-test`).
+
 #### 2. Cellular Telephony Subsystem (`mobile/telephony/`)
 - **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)** (13,125 B | 357 lines)
   - *Aim:* Native C telephony daemon (`< 2 MB` RSS). Connects to Qualcomm/MediaTek baseband via ModemManager / `mmcli`, controls SIM state, routes VoLTE/VoNR audio streams, handles SMS lifecycle, and exposes `/run/libredroid/telephony.sock`.

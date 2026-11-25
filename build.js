@@ -90,9 +90,31 @@ const htmlContent = `<!DOCTYPE html>
         <div class="app-icon droid-icon">🤖</div>
         <div class="app-title">Android Box</div>
       </div>
+      <div class="app-item" data-app="store" id="app-item-store">
+        <div class="app-icon store-icon">🏪</div>
+        <div class="app-title">App Store</div>
+      </div>
       <div class="app-item" data-app="security">
         <div class="app-icon argus-icon">🔒</div>
         <div class="app-title">Security</div>
+      </div>
+    </section>
+
+    <!-- Sovereign App Store Panel -->
+    <section class="store-panel card" id="store-panel">
+      <div class="store-header">
+        <div>
+          <h3>Sovereign F-Droid Store</h3>
+          <span class="tel-label">Antimonopoly Distribution & Privacy Badges</span>
+        </div>
+        <button class="store-refresh-btn" id="btn-refresh-store">↻ Refresh</button>
+      </div>
+      <div class="store-meta-bar" id="store-meta-bar">
+        <span class="meta-pill">Ed25519 Signed</span>
+        <span class="meta-pill">Scorer v1.0.0</span>
+      </div>
+      <div class="store-package-list" id="store-package-list">
+        <div class="store-loading">Loading verified package index...</div>
       </div>
     </section>
 
@@ -299,6 +321,167 @@ body.sovereign-mobile-os {
   background: rgba(255, 255, 255, 0.4);
   border-radius: 3px;
 }
+
+/* Sovereign App Store Styles */
+.store-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.store-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.store-refresh-btn {
+  background: #202b42;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.store-refresh-btn:hover {
+  background: rgba(0, 229, 255, 0.15);
+}
+
+.store-meta-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.meta-pill {
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.store-package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.store-loading {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 16px 0;
+}
+
+.store-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.store-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.store-pkg-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.store-pkg-id {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.store-pkg-summary {
+  font-size: 12px;
+  color: #cfd8dc;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.store-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge-grade-aplus {
+  background: #004d40;
+  color: #a7ffeb;
+  border: 1px solid #00e676;
+}
+
+.badge-grade-a {
+  background: #1b5e20;
+  color: #b9f6ca;
+  border: 1px solid #69f0ae;
+}
+
+.badge-grade-b {
+  background: #33691e;
+  color: #f0f4c3;
+  border: 1px solid #c0ca33;
+}
+
+.badge-grade-c {
+  background: #e65100;
+  color: #ffe0b2;
+  border: 1px solid #ff9800;
+}
+
+.badge-grade-f {
+  background: #b71c1c;
+  color: #ffcdd2;
+  border: 1px solid #f44336;
+}
+
+.badge-repro {
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--success);
+}
+
+.badge-waiver {
+  background: rgba(255, 214, 0, 0.15);
+  color: var(--warning);
+}
+
+.badge-tracker {
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--accent);
+}
+
+.badge-tracker-warn {
+  background: rgba(255, 23, 68, 0.18);
+  color: var(--danger);
+  border: 1px solid rgba(255, 23, 68, 0.3);
+}
+
+.badge-egress {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+}
 `;
 
 const jsContent = `
@@ -333,6 +516,68 @@ const jsContent = `
       btn.classList.toggle('active');
     });
   });
+
+  // Sovereign App Store Client Loader
+  async function loadStoreIndex() {
+    const listEl = document.getElementById('store-package-list');
+    if (!listEl) return;
+    try {
+      const headers = {};
+      const token = window.LRD_BRIDGE_TOKEN || localStorage.getItem('LRD_BRIDGE_TOKEN') || 'sovereign_dev_token';
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+        headers['X-LRD-Token'] = token;
+      }
+      const resp = await fetch('/api/store/index', { headers });
+      if (!resp.ok) {
+        throw new Error('HTTP ' + resp.status + ': ' + resp.statusText);
+      }
+      const data = await resp.json();
+      const pkgs = data.packages || [];
+      if (pkgs.length === 0) {
+        listEl.innerHTML = '<div class="store-loading">No packages available in repository index.</div>';
+        return;
+      }
+      listEl.innerHTML = pkgs.map(pkg => {
+        const score = pkg.privacy_score || {};
+        const grade = score.grade || 'N/A';
+        const total = score.total_score != null ? score.total_score : '--';
+        const bd = score.breakdown || {};
+        const trackerCount = bd.tracker_absence ? bd.tracker_absence.detected_count : 0;
+        const repro = pkg.reproducible ? '✔ Reproducible' : (pkg.reproducible_waiver ? '⚖ Waiver' : '✖ Unverified');
+        const reproClass = pkg.reproducible ? 'badge-repro' : (pkg.reproducible_waiver ? 'badge-waiver' : 'badge-tracker-warn');
+        const egress = bd.egress_alignment ? bd.egress_alignment.mode : 'none';
+        const gradeClass = 'badge-grade-' + grade.toLowerCase().replace('+', 'plus');
+        const trackerClass = trackerCount === 0 ? 'badge-tracker' : 'badge-tracker-warn';
+        const trackerText = trackerCount === 0 ? '✔ 0 Trackers' : ('⚠ ' + trackerCount + ' Trackers');
+
+        return [
+          '<div class="store-card" data-package-id="' + pkg.id + '">',
+          '  <div class="store-card-header">',
+          '    <div>',
+          '      <div class="store-pkg-name">' + pkg.name + '</div>',
+          '      <div class="store-pkg-id">' + pkg.id + ' • v' + (pkg.version_name || '') + '</div>',
+          '    </div>',
+          '    <span class="badge ' + gradeClass + '">' + grade + ' (' + total + '/100)</span>',
+          '  </div>',
+          '  <div class="store-pkg-summary">' + (pkg.summary || '') + '</div>',
+          '  <div class="store-badges">',
+          '    <span class="badge ' + trackerClass + '">' + trackerText + '</span>',
+          '    <span class="badge ' + reproClass + '">' + repro + '</span>',
+          '    <span class="badge badge-egress">🛡️ ' + egress + '</span>',
+          '    <span class="badge badge-egress">📜 ' + (pkg.license || 'FOSS') + '</span>',
+          '  </div>',
+          '</div>'
+        ].join('\n');
+      }).join('\n');
+    } catch (err) {
+      listEl.innerHTML = '<div class="store-loading" style="color:var(--danger)">Failed to load store index: ' + err.message + '</div>';
+    }
+  }
+
+  const refreshBtn = document.getElementById('btn-refresh-store');
+  if (refreshBtn) refreshBtn.addEventListener('click', loadStoreIndex);
+  loadStoreIndex();
 })();
 `;
 
