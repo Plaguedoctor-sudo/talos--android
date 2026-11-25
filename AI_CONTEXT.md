@@ -315,6 +315,7 @@ Always use `make` targets from `/home/alpha/android`:
 | `make reproducible` | Executes dual-build bit-for-bit test across independent paths and publishes attestation JSON. |
 | `make reproducible-verify` | Audits build output directory against published attestation using stdlib-only python. |
 | `make reproducible-docker` | Builds and verifies reproducibility inside pinned debian:bookworm-slim container. |
+| `make reuse-lint` | Audits REUSE 3.0 and SPDX license compliance across the entire codebase. |
 | `make clean` | Purges pytest and Python bytecode caches. |
 
 ### 7.2. Adding a New Daemon or Hardware Subsystem
@@ -423,6 +424,15 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
   - *Aim:* Comprehensive third-party audit manual detailing single-command rebuild workflows via Nix, Docker, or native host.
 - **[.github/workflows/repro.yml](file:///home/alpha/android/.github/workflows/repro.yml)**
   - *Aim:* Continuous integration workflow running a 2-runner matrix (`ubuntu-22.04` and `ubuntu-24.04`) asserting cross-distribution bit-for-bit equality.
+
+#### 1.2. Sovereign Commons Governance & Legal Policies
+- **[CHARTER.md](file:///home/alpha/android/CHARTER.md)**: Constitutional charter defining the six sovereign aims, non-profit foundation structure, antimonopoly guardrails, explicit **no single-entity veto**, and funding prohibitions.
+- **[GOVERNANCE.md](file:///home/alpha/android/GOVERNANCE.md)**: Operational procedures governing 1-seat board caps, adtech/telemetry monetization bans, **3-of-5 threshold multisig release signing**, and the irrevocable free software covenant.
+- **[MAINTAINERS.md](file:///home/alpha/android/MAINTAINERS.md)**: Comprehensive ownership matrix covering all 21 subsystems in the tree, along with the meritocratic progression path for maintainership.
+- **[CONTRIBUTING.md](file:///home/alpha/android/CONTRIBUTING.md)**: Developer Certificate of Origin (DCO 1.1) guidelines, SPDX requirements, 72-hour review SLAs, and zero-dependency constraints.
+- **[CODE_OF_CONDUCT.md](file:///home/alpha/android/CODE_OF_CONDUCT.md)**: Community standards, harassment-free participation pledge, and enforcement procedures.
+- **[TRADEMARK.md](file:///home/alpha/android/TRADEMARK.md)**: Trademark usage rules, permitted nominative fair use, and mandatory fork renaming rules.
+- **[REUSE.toml](file:///home/alpha/android/REUSE.toml)**: Free Software Foundation Europe REUSE 3.0 license and copyright attribution specification.
 
 #### 2. Cellular Telephony Subsystem (`mobile/telephony/`)
 - **[lrd-telephonyd.c](file:///home/alpha/android/mobile/telephony/lrd-telephonyd.c)** (13,125 B | 357 lines)

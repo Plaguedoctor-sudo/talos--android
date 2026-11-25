@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker
+.PHONY: all check test test-trust test-mobile fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -60,3 +60,6 @@ reproducible-verify:
 
 reproducible-docker:
 	docker build -f repro/Dockerfile -t talos-repro:latest .
+
+reuse-lint:
+	$(PYTHON) scripts/reuse-lint.py
