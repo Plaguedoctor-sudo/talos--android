@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 TALOS / LibreMobile OS Contributors
+# SPDX-License-Identifier: Apache-2.0
+homepage: "https://github.com/Plaguedoctor-sudo/talos--android"
+language: c
+primary_contact: "security@talos-project.org"
+auto_ccs:
+  - "audits@talos-project.org"
+main_repo: "https://github.com/Plaguedoctor-sudo/talos--android"
+sanitizers:
+  - address
+  - undefined
+fuzzing_engines:
+  - libfuzzer

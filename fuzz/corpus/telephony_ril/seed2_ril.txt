@@ -1,0 +1,6 @@
++CSQ: 28,99
++CREG: 2, 1, "0001", "00010001", 7
++COPS: 0, 0, "TALOS 5G-NR", 12
++CMGL: 1,"REC UNREAD","+15551234567"
+Hello Sovereign Mobile
+OK

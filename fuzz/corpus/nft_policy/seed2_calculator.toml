@@ -1,0 +1,9 @@
+# LibreDroid Egress Policy: Offline Calculator
+[app]
+id = "com.talos.calculator"
+name = "Offline Calculator"
+type = "native"
+
+[network]
+mode = "blocked"
+kill_switch = true

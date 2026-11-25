@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 TALOS / LibreMobile OS Contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Continuous Security Fuzzing Suite
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Nightly run at 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: 'Fuzzing duration per target in seconds'
+        required: false
+        default: '60'
+  pull_request:
+    paths:
+      - 'fuzz/**'
+      - 'mobile/telephony/**'
+      - 'mobile/firewall/**'
+      - 'argus/**'
+      - 'mobile/power/**'
+      - 'mobile/waydroid/**'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-fuzz:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            gcc \
+            clang \
+            make \
+            zip
+
+      - name: Compile and Run Smoke Fuzzing Suite
+        env:
+          SMOKE_DURATION: ${{ github.event.inputs.duration || 60 }}
+        run: |
+          make fuzz-smoke
+
+      - name: Upload Crash Logs and Artifacts (On Failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crash-reports
+          path: |
+            out/fuzz/crashes/
+            out/fuzz/*_smoke.log
+          retention-days: 14
