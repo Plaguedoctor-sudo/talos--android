@@ -40,11 +40,16 @@ def _make_roundtrip_bundle(tmp_path, producer_mode="audit"):
 
 
 def _run_cli(bundle, keyring, *args):
-    env = dict(PYTHONPATH=f"/home/alpha/android/.deps:/home/alpha/android:{sys.path}")
-    r = subprocess.run([sys.executable, "-m", "argus.verify.cli", str(bundle),
-                        "--keyring", str(keyring)] + list(args),
-                       capture_output=True, text=True, env=env)
-    return r.returncode, r.stdout, r.stderr
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    from argus.verify import cli
+
+    cmd_args = [str(bundle), "--keyring", str(keyring)] + list(args)
+    f_out = io.StringIO()
+    f_err = io.StringIO()
+    with redirect_stdout(f_out), redirect_stderr(f_err):
+        code = cli.main(cmd_args)
+    return code, f_out.getvalue(), f_err.getvalue()
 
 
 def _remanifest(bundle, dev):

@@ -5,12 +5,19 @@ HERE = pathlib.Path(__file__).parent
 FIX = HERE / "fixtures" / "basic.argx"
 
 
+from collections import namedtuple
+CliResult = namedtuple("CliResult", ["returncode", "stdout", "stderr"])
+
+
 def run(bundle: pathlib.Path, *extra):
-    r = subprocess.run(
-        [sys.executable, "-m", "argus.verify.cli", str(bundle),
-         "--keyring", str(HERE / "fixtures" / "keyring"), *extra],
-        capture_output=True, text=True)
-    return r.returncode, r.stdout, r.stderr
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    from argus.verify import cli
+    cmd_args = [str(bundle), "--keyring", str(HERE / "fixtures" / "keyring")] + list(extra)
+    f_out, f_err = io.StringIO(), io.StringIO()
+    with redirect_stdout(f_out), redirect_stderr(f_err):
+        code = cli.main(cmd_args)
+    return CliResult(code, f_out.getvalue(), f_err.getvalue())
 
 
 def _copy(tmp_path):

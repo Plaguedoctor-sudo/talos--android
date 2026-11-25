@@ -22,11 +22,19 @@ FIX = HERE.parent / "argx" / "fixtures" / "basic.argx"
 KEYRING = HERE.parent / "argx" / "fixtures" / "keyring"
 
 
+from collections import namedtuple
+CliResult = namedtuple("CliResult", ["returncode", "stdout", "stderr"])
+
+
 def run_verify(bundle: pathlib.Path, *extra):
-    cmd = [sys.executable, "-m", "argus.verify.cli", str(bundle), "--keyring", str(KEYRING)]
-    cmd.extend(extra)
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    return r.returncode, r.stdout, r.stderr
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    from argus.verify import cli
+    cmd = [str(bundle), "--keyring", str(KEYRING)] + list(extra)
+    f_out, f_err = io.StringIO(), io.StringIO()
+    with redirect_stdout(f_out), redirect_stderr(f_err):
+        code = cli.main(cmd)
+    return CliResult(code, f_out.getvalue(), f_err.getvalue())
 
 
 def _copy_bundle(tmp_path, name="b.argx"):

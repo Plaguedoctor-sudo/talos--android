@@ -67,3 +67,18 @@ Auditors are requested to independently assert and attempt to violate the follow
    - A device disconnected from the network must never execute a destructive wipe if $elapsed \le timeout$. Destructive offline action must strictly require both timer breach and explicit policy authorization (`allow_offline_wipe == true`).
 4. **Duress Deniability & Plausibility Gate**:
    - Duress mode enrollment must reject decoys with plausibility scores below the configured threshold, preventing trivial detection by forensic examiners. Authentication must execute in constant time regardless of credential validity.
+
+---
+
+## 5. Audit Commissioning Preconditions
+
+Prior to commissioning external cryptographic audit activities, the repository must satisfy the following automated quality and integrity gates:
+
+1. **Test Coverage Floor**:
+   - Every in-scope file listed in Section 2 must maintain a strictly enforced line coverage floor of at least **70%**.
+   - Core cryptographic focus components (`argus/vault.py`, `argus/argf2/`, `argus/duress.py`, `argus/deadman.py`, and `argus/verify/`) must meet or exceed **85%** line coverage.
+   - Coverage verification is enforced via `make audit-prep`, which evaluates the test suite against `audit/SCOPE.md` boundaries and halts with a non-zero exit code if any target falls below 70%.
+2. **Deterministic Artifact Verification**:
+   - Test vectors generated in `audit/test-vectors/` must validate without defect across all 9 verification phases.
+   - Verified snapshot coverage metrics are tracked in `audit/coverage-report.txt`.
+

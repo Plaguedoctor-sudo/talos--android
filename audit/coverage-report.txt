@@ -2,12 +2,25 @@
 platform linux -- Python 3.12.3, pytest-9.2.0, pluggy-1.7.0
 rootdir: /home/alpha/android
 plugins: cov-7.1.0, hypothesis-6.170.17
-collected 18 items
+collected 102 items
 
-tests/test_argf2_properties.py ......                                    [ 33%]
-tests/test_duress_properties.py ....                                     [ 55%]
-tests/test_deadman_properties.py ...                                     [ 72%]
-tests/test_audit_vectors.py .....                                        [100%]
+tests/argx/test_tamper.py .....                                          [  4%]
+tests/e2e/test_multiboot.py ...                                          [  7%]
+tests/e2e/test_range.py ...                                              [ 10%]
+tests/e2e/test_roundtrip.py .                                            [ 11%]
+tests/producers/test_degraded.py ......                                  [ 17%]
+tests/producers/test_ledger.py ......                                    [ 23%]
+tests/producers/test_producers.py .......                                [ 30%]
+tests/tag/test_tags.py ..........                                        [ 40%]
+tests/test_argf2_properties.py ......                                    [ 46%]
+tests/test_audit_focus_coverage.py ...............                       [ 60%]
+tests/test_audit_vectors.py .....                                        [ 65%]
+tests/test_deadman_properties.py ...                                     [ 68%]
+tests/test_duress_properties.py ....                                     [ 72%]
+tests/test_rats_verifier.py .......                                      [ 79%]
+tests/test_store_scoring.py ........                                     [ 87%]
+tests/test_vault_properties.py ..........                                [ 97%]
+tests/verify/test_grade.py ...                                           [100%]
 
 ================================ tests coverage ================================
 _______________ coverage: platform linux, python 3.12.3-final-0 ________________
@@ -17,41 +30,41 @@ Name                                     Stmts   Miss  Cover
 argus/__init__.py                            3      0   100%
 argus/alibi.py                             106    106     0%
 argus/argf2/__init__.py                      0      0   100%
-argus/argf2/config.py                       71     71     0%
-argus/argf2/export.py                      218    218     0%
-argus/argf2/ledger.py                      213    213     0%
-argus/argf2/ledgerd.py                     113    113     0%
-argus/argf2/producers/__init__.py            6      6     0%
-argus/argf2/producers/audit_netlink.py      75     75     0%
-argus/argf2/producers/capability.py         42     42     0%
-argus/argf2/producers/drain.py              37     37     0%
-argus/argf2/producers/enrich.py             26     26     0%
-argus/argf2/producers/ring.py               30     30     0%
-argus/argf2/producers/watchdog.py           17     17     0%
-argus/argf2/signers.py                      30     30     0%
-argus/argf2/writer.py                      105     69    34%
+argus/argf2/config.py                       71     15    79%
+argus/argf2/export.py                      218     24    89%
+argus/argf2/ledger.py                      213     15    93%
+argus/argf2/ledgerd.py                     113     41    64%
+argus/argf2/producers/__init__.py            6      0   100%
+argus/argf2/producers/audit_netlink.py      75     53    29%
+argus/argf2/producers/capability.py         42     15    64%
+argus/argf2/producers/drain.py              37      4    89%
+argus/argf2/producers/enrich.py             26      0   100%
+argus/argf2/producers/ring.py               30      0   100%
+argus/argf2/producers/watchdog.py           17      2    88%
+argus/argf2/signers.py                      30      3    90%
+argus/argf2/writer.py                      105      0   100%
 argus/chronology.py                         13      9    31%
 argus/compartments.py                      205    205     0%
 argus/config.py                             26      0   100%
 argus/db.py                                 41     27    34%
-argus/deadman.py                            83     11    87%
-argus/duress.py                            130     32    75%
+argus/deadman.py                            83      1    99%
+argus/duress.py                            130     15    88%
 argus/entities.py                           22      6    73%
 argus/isolation.py                          72     72     0%
-argus/ledger.py                             43      4    91%
-argus/protective.py                         26      8    69%
+argus/ledger.py                             43      3    93%
+argus/protective.py                         26      0   100%
 argus/sentinel.py                           64     64     0%
-argus/timebase.py                          125     45    64%
+argus/timebase.py                          125     43    66%
 argus/tor.py                               181    181     0%
-argus/vault.py                             125     88    30%
+argus/vault.py                             125      6    95%
 argus/verify/__init__.py                     0      0   100%
-argus/verify/bundle.py                      52     38    27%
-argus/verify/cli.py                         60     60     0%
-argus/verify/findings.py                    40     14    65%
-argus/verify/record.py                     176     52    70%
-argus/verify/trust.py                       47     33    30%
-argus/verify/verify.py                     404    367     9%
+argus/verify/bundle.py                      52      5    90%
+argus/verify/cli.py                         60     14    77%
+argus/verify/findings.py                    40      0   100%
+argus/verify/record.py                     176     15    91%
+argus/verify/trust.py                       47      4    91%
+argus/verify/verify.py                     404     62    85%
 argus/watcher.py                            79     79     0%
 ------------------------------------------------------------
-TOTAL                                     3106   2448    21%
-============================== 18 passed in 5.64s ==============================
+TOTAL                                     3106   1089    65%
+============================= 102 passed in 10.83s =============================

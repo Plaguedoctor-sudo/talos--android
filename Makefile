@@ -82,7 +82,9 @@ telephony-matrix-render:
 audit-prep:
 	@mkdir -p audit/test-vectors
 	$(PYTHON) scripts/generate-audit-vectors.py
-	$(PYTHON) -m pytest tests/test_argf2_properties.py tests/test_duress_properties.py tests/test_deadman_properties.py tests/test_audit_vectors.py --cov=argus --cov-report=term | tee audit/coverage-report.txt
+	$(PYTHON) -m pytest tests/ --cov=argus --cov-report=term | tee audit/coverage-report.txt
+	@chmod +x scripts/check-audit-coverage.py
+	@$(PYTHON) scripts/check-audit-coverage.py audit/coverage-report.txt
 
 store-index:
 	@chmod +x store/build-index.sh

@@ -29,11 +29,19 @@ def _setup_ledger_with_segments(tmp_path, num_records=12, rotate_bytes=350):
     return keys, keyring, dev, signer
 
 
+from collections import namedtuple
+CliResult = namedtuple("CliResult", ["returncode", "stdout", "stderr"])
+
+
 def _run_cli(bundle, keyring, *args):
-    env = dict(PYTHONPATH=f"/home/alpha/android/.deps:/home/alpha/android:{sys.path}")
-    return subprocess.run([sys.executable, "-m", "argus.verify.cli", str(bundle),
-                           "--keyring", str(keyring)] + list(args),
-                          capture_output=True, text=True, env=env)
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    from argus.verify import cli
+    cmd_args = [str(bundle), "--keyring", str(keyring)] + list(args)
+    f_out, f_err = io.StringIO(), io.StringIO()
+    with redirect_stdout(f_out), redirect_stderr(f_err):
+        code = cli.main(cmd_args)
+    return CliResult(code, f_out.getvalue(), f_err.getvalue())
 
 
 def test_range_excludes_interior(tmp_path):

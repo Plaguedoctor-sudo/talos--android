@@ -60,10 +60,16 @@ def test_roundtrip_clean(tmp_path):
     out = Exporter(tmp_path / "ledger", tmp_path / "b.argx", keys, dev_pem, signer)
     bundle = out.run("e2e", "test")
 
-    env = dict(PYTHONPATH=f"/home/alpha/android/.deps:/home/alpha/android:{sys.path}")
-    r = subprocess.run([sys.executable, "-m", "argus.verify.cli", str(bundle),
-                        "--keyring", str(keyring), "--scope-check"],
-                       capture_output=True, text=True, env=env)
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    from collections import namedtuple
+    from argus.verify import cli
+
+    CliResult = namedtuple("CliResult", ["returncode", "stdout", "stderr"])
+    f_out, f_err = io.StringIO(), io.StringIO()
+    with redirect_stdout(f_out), redirect_stderr(f_err):
+        code = cli.main([str(bundle), "--keyring", str(keyring), "--scope-check"])
+    r = CliResult(code, f_out.getvalue(), f_err.getvalue())
     assert r.returncode in (0, 1), f"CLI failed (code {r.returncode}):\nSTDOUT: {r.stdout}\nSTDERR: {r.stderr}"
     assert "V-501" not in r.stdout
     assert "V-503" not in r.stdout
