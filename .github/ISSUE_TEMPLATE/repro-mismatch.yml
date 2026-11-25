@@ -1,0 +1,55 @@
+name: Reproducible Build Hash Mismatch
+description: File a discrepancy report if an independent rebuild diverges from the published attestation.
+title: "[Repro Discrepancy]: Build hash mismatch at commit <SHA>"
+labels: ["reproducibility", "security-critical", "defect"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for independently verifying TALOS / LibreMobile OS reproducibility.
+        An attestation is only valid if independent machines achieve bit-identical results.
+  - type: input
+    id: commit_sha
+    attributes:
+      label: Commit SHA
+      description: The exact Git commit hash being audited.
+      placeholder: e.g. 89b09f17c22c6965fe77adc2167d43d0161cfb7e
+    validations:
+      required: true
+  - type: input
+    id: attestation_file
+    attributes:
+      label: Attestation File
+      description: The published attestation JSON checked against.
+      placeholder: e.g. repro/attestation-89b09f17c22c6965fe77adc2167d43d0161cfb7e.json
+    validations:
+      required: true
+  - type: textarea
+    id: expected_hashes
+    attributes:
+      label: Expected Artifact Hashes
+      description: SHA-256 digests from the published attestation.
+    validations:
+      required: true
+  - type: textarea
+    id: observed_hashes
+    attributes:
+      label: Observed Artifact Hashes
+      description: SHA-256 digests observed during your independent build.
+    validations:
+      required: true
+  - type: textarea
+    id: build_environment
+    attributes:
+      label: Build Environment & Toolchain Details
+      description: OS distribution, kernel version, gcc version, e2fsprogs version, container runtime.
+      placeholder: e.g. Debian 12 (bookworm), Linux 6.6.x, GCC 12.2.0, docker / nix
+    validations:
+      required: true
+  - type: input
+    id: verifier_contact
+    attributes:
+      label: Verifier Contact / PGP Key ID
+      description: Email address or PGP key fingerprint for follow-up coordination.
+    validations:
+      required: false

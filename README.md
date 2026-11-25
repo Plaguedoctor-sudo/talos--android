@@ -7,6 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 [![Build & Trust Status](https://img.shields.io/badge/verification-100%2F100%20PASS-brightgreen.svg)](#3-subsystem-verification-status)
 [![Reproducibility](https://img.shields.io/badge/reproducible-100%25%20bit--for--bit-blue.svg)](repro/README.md)
+[![Independent Repro](https://github.com/Plaguedoctor-sudo/talos--android/actions/workflows/repro-independent.yml/badge.svg)](https://github.com/Plaguedoctor-sudo/talos--android/actions/workflows/repro-independent.yml)
 [![REUSE Status](https://img.shields.io/badge/REUSE-compliant-blue.svg)](REUSE.toml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-orange.svg)](LICENSES/GPL-3.0-or-later.txt)
 [![Governance: Sovereign Commons](https://img.shields.io/badge/governance-antimonopoly%20commons-purple.svg)](GOVERNANCE.md)

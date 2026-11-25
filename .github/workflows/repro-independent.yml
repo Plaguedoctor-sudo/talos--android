@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2026 TALOS / LibreMobile OS Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Independent Rebuild & Attestation Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repro-independent:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Fresh Checkout (No Cache)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Build Prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            gcc \
+            make \
+            python3 \
+            nodejs \
+            npm \
+            e2fsprogs \
+            tar \
+            xz-utils \
+            diffutils
+
+      - name: Execute Independent Build
+        run: |
+          mkdir -p out/independent
+          ./scripts/repro-build.sh out/independent
+
+      - name: Verify Against Committed Attestation Record
+        run: |
+          COMMIT_SHA=$(git rev-parse HEAD)
+          ATTESTATION="repro/attestation-${COMMIT_SHA}.json"
+          if [ ! -f "$ATTESTATION" ]; then
+            ATTESTATION=$(ls -t repro/attestation-*.json 2>/dev/null | head -n 1 || true)
+          fi
+          if [ -z "$ATTESTATION" ] || [ ! -f "$ATTESTATION" ]; then
+            echo "Error: No published attestation record found in repro/" >&2
+            exit 1
+          fi
+          echo "Auditing independent build output against: $ATTESTATION"
+          python3 repro/verify-attestation.py "$ATTESTATION" out/independent

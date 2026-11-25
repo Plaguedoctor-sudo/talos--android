@@ -140,3 +140,32 @@ Artifacts audited and matched bit-for-bit:
 | **Manifest** | `SHA256SUMS.txt` | Complete cryptographic hash digest index |
 
 > **TODO(operator):** Sign release attestations with the official TALOS Ed25519 offline root key using `signify` or `gpg --detach-sign`.
+
+---
+
+## 5. Third-Party Independent Verification
+
+An attestation is only meaningful when verified by a machine that is not the one that produced it. The GitHub Actions job `repro-independent` runs this verification on every push.
+
+### Exact Instructions for External Verifiers
+If you are an external auditor, downstream packager, or community verifier auditing on a clean, independent machine:
+
+```bash
+# 1. Fresh clone on clean hardware
+git clone https://github.com/Plaguedoctor-sudo/talos--android.git
+cd talos--android
+
+# 2. Execute bit-for-bit build in pinned container
+make reproducible-docker
+
+# 3. Verify resulting artifacts against committed attestation
+python3 repro/verify-attestation.py repro/attestation-$(git rev-parse HEAD).json out/a
+```
+
+### Public Verification Ledger
+Independent verifiers who successfully reproduce the binary artifacts are encouraged to log their results in the public ledger:
+- **[repro/THIRD-PARTY-VERIFICATIONS.md](file:///home/alpha/android/repro/THIRD-PARTY-VERIFICATIONS.md)**
+
+### Reporting Hash Discrepancies
+If your build produces non-identical artifact digests, do not ignore the deviation. Submit a detailed discrepancy report using the structured issue template:
+- **[.github/ISSUE_TEMPLATE/repro-mismatch.yml](file:///home/alpha/android/.github/ISSUE_TEMPLATE/repro-mismatch.yml)**
