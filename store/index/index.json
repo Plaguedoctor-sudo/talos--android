@@ -529,5 +529,7 @@
     "reference_date": "2026-11-25",
     "score_version": "1.0.0",
     "total_packages": 9
-  }
+  },
+  "signed": false,
+  "signature": null
 }

@@ -1,0 +1,3 @@
+# Files allowed by pre-commit-key-guard
+# Format: repo-relative paths or patterns
+tests/argx/fixtures/*

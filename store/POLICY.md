@@ -81,7 +81,29 @@ Every application is scored deterministically by [store/privacy-score.py](file:/
 ## 4. Signing, Indexing, and Curation
 
 - **Signed Manifests:** Repository metadata is published to `store/index/index.json` accompanied by a detached Ed25519 signature (`index.json.sig`).
-- **Pinned Key:** Verifiers authenticate index signatures against the pinned Foundation signing key stored in `store/keys/fdroid-signing.pub`.
+- **Pinned Key:** Verifiers authenticate index signatures against the pinned Foundation signing key stored in `store/keys/fdroid-signing.pub` and validated against `store/keys/fingerprint.txt`.
 - **Emergency Revocation:** If a security regression or undeclared tracker is discovered post-release, the package is immediately removed from the index and an append-only ARGUS audit revocation event is logged.
 
-`TODO(operator): Provision primary production Ed25519 repository release keys into store/keys/ and configure secure HSM signing.`
+---
+
+## 5. Signing Key Lifecycle
+
+To prevent catastrophic repository poisoning, private release keys are governed by strict operational protocols:
+
+1. **Air-Gapped Offline Generation:**
+   - Private signing keys must NEVER be generated on internet-connected build servers or committed to any Git repository.
+   - Operators generate release keys on offline, air-gapped workstations using `scripts/provision-store-key.sh` or standard OpenSSL/cryptography CLI outside the repository tree (e.g. `~/.config/talos/store-signing.sec`).
+   - Only the public key (`fdroid-signing.pub`) and SHA-256 fingerprint (`fingerprint.txt`) are committed to version control.
+2. **Hardware Security Module (HSM) Recommendation:**
+   - Production index signing should be performed via FIPS 140-2 Level 3 HSMs or smartcards (e.g., YubiKey 5 FIPS, Nitrokey Pro/Storage) utilizing PKCS#11 tokens where secret keys cannot be extracted.
+3. **Annual Rotation Cadence:**
+   - Signing keys must be rotated at least once every 365 days.
+   - Rotations must be signed with both old and new keys for a 30-day grace transition period.
+4. **Emergency Revocation Procedure:**
+   - If a private signing key is suspected of compromise, the operator must:
+     1. Immediately mark `store/keys/fingerprint.txt` as `UNPINNED — operator must provision release key per store/POLICY.md`.
+     2. Document the compromised fingerprint in `store/keys/COMPROMISED.md` and publish a security advisory per `SECURITY.md`.
+     3. Trigger `scripts/rewrite-history-for-key-removal.sh` if private material was accidentally committed.
+     4. Notify the security response team within 24 hours at `security@talos-project.org`.
+
+`TODO(operator): Provision primary production Ed25519 repository release keys into ~/.config/talos/store-signing.sec and pin public key in store/keys/fingerprint.txt.`

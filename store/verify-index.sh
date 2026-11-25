@@ -24,6 +24,22 @@ if [ ! -f "$INDEX_FILE" ]; then
     exit 1
 fi
 
+# Hard failure if release key is UNPINNED
+if [ -f "$FINGERPRINT_FILE" ]; then
+    FP_CONTENT="$(cat "$FINGERPRINT_FILE")"
+    if [[ "$FP_CONTENT" == *"UNPINNED"* ]]; then
+        echo "Refusing to verify: release key not provisioned. See store/POLICY.md." >&2
+        exit 1
+    fi
+fi
+
+# Hard failure if index is unsigned
+IS_SIGNED="$(python3 -c 'import json, sys; data = json.load(open(sys.argv[1])); print(data.get("signed", True))' "$INDEX_FILE" 2>/dev/null || echo "True")"
+if [ "$IS_SIGNED" = "False" ]; then
+    echo "Index is unsigned. Operator must provision a release key (store/POLICY.md)." >&2
+    exit 1
+fi
+
 if [ ! -f "$SIG_FILE" ]; then
     echo "Error: Detached signature not found at $SIG_FILE" >&2
     exit 1
@@ -42,15 +58,13 @@ python3 "$SCRIPT_DIR/sign-index.py" verify \
     --pubkey "$PUBKEY"
 
 # 2. Key Fingerprint Match Check
-if [ -f "$FINGERPRINT_FILE" ]; then
-    EXPECTED_FP="$(cat "$FINGERPRINT_FILE" | tr -d '[:space:]')"
-    ACTUAL_FP="$(python3 -c 'import hashlib, sys; print(hashlib.sha256(bytes.fromhex(open(sys.argv[1]).read().strip())).hexdigest())' "$PUBKEY")"
-    if [ "$EXPECTED_FP" != "$ACTUAL_FP" ]; then
-        echo "Error: Key fingerprint mismatch: expected $EXPECTED_FP, got $ACTUAL_FP" >&2
-        exit 1
-    fi
-    echo "✔ Key fingerprint verified: $ACTUAL_FP"
+EXPECTED_FP="$(cat "$FINGERPRINT_FILE" | tr -d '[:space:]')"
+ACTUAL_FP="$(python3 -c 'import hashlib, sys; print(hashlib.sha256(bytes.fromhex(open(sys.argv[1]).read().strip())).hexdigest())' "$PUBKEY")"
+if [ "$EXPECTED_FP" != "$ACTUAL_FP" ]; then
+    echo "Error: Key fingerprint mismatch: expected $EXPECTED_FP, got $ACTUAL_FP" >&2
+    exit 1
 fi
+echo "✔ Key fingerprint verified: $ACTUAL_FP"
 
 # 3. Schema & Integrity Validation
 echo "[*] Validating store index schema and privacy score integrity..."

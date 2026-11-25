@@ -72,10 +72,17 @@ Contributions must strictly adhere to the following principles:
 - **Lazy Consensus:** If a pull request receives no objections after review by the subsystem maintainer, it may be merged.
 - **Pre-Submission Gates:** Pull requests must pass local validation before review:
   ```bash
-  make check         # Must pass all 100 tests (mobile + ARGUS trust)
+  make check         # Must pass all 102 tests (mobile + ARGUS trust)
   make reproducible  # Must produce bit-for-bit identical dual-build artifacts
   make reuse-lint    # Must pass SPDX/REUSE license linting
   ```
+
+### 4.1 Mandatory Pre-Commit Key Guard
+To prevent accidental leakage of private cryptographic keys or certificates, all contributors MUST install the repository pre-commit hook:
+```bash
+ln -s ../../scripts/pre-commit-key-guard.sh .git/hooks/pre-commit
+```
+This hook inspects all staged files and immediately blocks commits containing files matching `*.sec`, `*.pem`, `*.key`, `id_ed25519`, or `id_rsa`. Authorized test fixtures must be explicitly allowlisted in `.keyguard-allow`.
 
 ---
 

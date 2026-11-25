@@ -9,6 +9,15 @@ node_modules/
 build_tmp/
 *.o
 out/
+tests/argx/fixtures/
+
+# Cryptographic secret keys and certificates
+store/keys/*.sec
+store/keys/*.pem
+store/keys/*.key
+*.sec
+*.pem
+*.key
 
 # Large generated disk images (500MB+ sparse ext4 release images)
 *.img

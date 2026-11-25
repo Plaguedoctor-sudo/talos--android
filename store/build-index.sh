@@ -2,7 +2,7 @@
 # ==============================================================================
 # TALOS Sovereign App Store Index Builder (store/build-index.sh)
 # Fetches upstream mirror index, computes deterministic privacy scores,
-# and generates a signed repository index (store/index/index.json + .sig).
+# and generates a repository index (store/index/index.json + .sig).
 #
 # SPDX-License-Identifier: Apache-2.0
 # ==============================================================================
@@ -19,8 +19,10 @@ UPSTREAM_CACHE="$DATA_DIR/upstream-index.json"
 TRACKERS_DB="$DATA_DIR/trackers.json"
 POLICY_DIR="$REPO_ROOT/security/egress/policy"
 
-SIGNING_KEY="$KEYS_DIR/fdroid-signing.sec"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/talos"
+SIGNING_KEY="${SIGNING_KEY:-$CONFIG_DIR/store-signing.sec}"
 PUBKEY="$KEYS_DIR/fdroid-signing.pub"
+FINGERPRINT_FILE="$KEYS_DIR/fingerprint.txt"
 OUTPUT_INDEX="$INDEX_DIR/index.json"
 OUTPUT_SIG="$INDEX_DIR/index.json.sig"
 
@@ -59,20 +61,56 @@ python3 "$SCRIPT_DIR/privacy-score.py" \
     --ref-date "2026-11-25" \
     --output "$OUTPUT_INDEX"
 
-# Step 3: Sign index with pinned Ed25519 key
-echo "[*] Signing repository index with Ed25519 key..."
-if [ ! -f "$SIGNING_KEY" ]; then
-    echo "[!] Signing key missing; generating local keypair..."
-    python3 "$SCRIPT_DIR/sign-index.py" keygen --out-dir "$KEYS_DIR"
+# Step 3: Check release key pinning and sign or emit UNSIGNED
+FP_CONTENT=""
+if [ -f "$FINGERPRINT_FILE" ]; then
+    FP_CONTENT="$(cat "$FINGERPRINT_FILE")"
 fi
 
-python3 "$SCRIPT_DIR/sign-index.py" sign \
-    --index "$OUTPUT_INDEX" \
-    --key "$SIGNING_KEY" \
-    --output "$OUTPUT_SIG"
+if [[ "$FP_CONTENT" == *"UNPINNED"* ]] || [ -z "$FP_CONTENT" ] || [ ! -f "$SIGNING_KEY" ]; then
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >&2
+    echo "WARNING: Store index generated UNSIGNED. Release key is UNPINNED." >&2
+    echo "Operator must provision release key outside repo per store/POLICY.md." >&2
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >&2
 
-echo "=========================================================="
-echo "✔ Store index built and signed successfully."
-echo "  Manifest:  $OUTPUT_INDEX"
-echo "  Signature: $OUTPUT_SIG"
-echo "=========================================================="
+    # Inject unsigned metadata into index.json
+    python3 -c '
+import json, sys
+path = sys.argv[1]
+with open(path, "r", encoding="utf-8") as f:
+    data = json.load(f)
+data["signed"] = False
+data["signature"] = None
+with open(path, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2)
+' "$OUTPUT_INDEX"
+    rm -f "$OUTPUT_SIG"
+
+    echo "=========================================================="
+    echo "✔ Store index built UNSIGNED (operator release key unpinned)."
+    echo "  Manifest:  $OUTPUT_INDEX"
+    echo "=========================================================="
+else
+    # Pinned and key present: sign normally
+    echo "[*] Signing repository index with provisioned Ed25519 key..."
+    python3 "$SCRIPT_DIR/sign-index.py" sign \
+        --index "$OUTPUT_INDEX" \
+        --key "$SIGNING_KEY" \
+        --output "$OUTPUT_SIG"
+
+    python3 -c '
+import json, sys
+path = sys.argv[1]
+with open(path, "r", encoding="utf-8") as f:
+    data = json.load(f)
+data["signed"] = True
+with open(path, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2)
+' "$OUTPUT_INDEX"
+
+    echo "=========================================================="
+    echo "✔ Store index built and signed successfully."
+    echo "  Manifest:  $OUTPUT_INDEX"
+    echo "  Signature: $OUTPUT_SIG"
+    echo "=========================================================="
+fi

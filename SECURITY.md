@@ -37,6 +37,8 @@ We follow a strict **90-day Coordinated Vulnerability Disclosure (CVD)** timelin
 
 Researchers agree not to disclose vulnerability details publicly prior to the expiration of the 90-day window or mutually agreed advisory publication.
 
+**Emergency Key Compromise Disclosure**: Any secret key material committed to this repository MUST be disclosed within 24 hours at the security contact; do not push history rewrites without coordination.
+
 ---
 
 ## 3. Safe Harbor Clause
@@ -96,3 +98,28 @@ We recognize and reward security researchers who help protect TALOS users. Rewar
 | **Low** | **$100 – $500** | Minor information leaks, non-security logic flaws, local denial-of-service requiring root privileges. |
 
 *Note*: `TODO(operator): configure bug bounty funding source and escrow account (e.g., Open Collective, GitHub Sponsors, or community security fund)`.
+
+---
+
+## 6. Compromised Keys & Incident Disclosure
+
+### Incident Report: INC-2026-001 (Store Index Signing Key Exposure)
+
+- **Affected Key:** Store Index Ed25519 Private Signing Key (`store/keys/fdroid-signing.sec`)
+- **Compromised Fingerprint (SHA-256):** `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391`
+- **Initial Exposure Commit:** `82ce129`
+
+#### Incident Timeline
+1. **2026-11-25 12:15 UTC:** During initial test generation of the F-Droid store index, `store/keys/fdroid-signing.sec` was inadvertently committed to Git.
+2. **2026-11-25 12:59 UTC:** Defect identified during security and integrity audit.
+3. **2026-11-25 13:05 UTC:** Remediation applied:
+   - Secret key purged from the working directory and index via `git rm`.
+   - Release key pin revoked in `store/keys/fingerprint.txt` to `UNPINNED`.
+   - History rewrite script prepared (`scripts/rewrite-history-for-key-removal.sh`) using `git filter-repo`.
+   - Pre-commit key guard enacted (`scripts/pre-commit-key-guard.sh`) blocking secret key extensions.
+   - Pinned public key verification fails closed in `store/verify-index.sh` if release key is unpinned.
+
+#### Client-Side Impact & Advisory
+- No TALOS production client should ever have trusted this key.
+- If any downstream client or test system pinned fingerprint `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391`, malicious index poisoning and package spoofing could occur.
+- **Action:** Any client with this key pinned must unpin it immediately. The store index will ship unsigned until the operator provisions an offline release key outside version control. Reference [store/keys/COMPROMISED.md](file:///home/alpha/android/store/keys/COMPROMISED.md) and [store/POLICY.md](file:///home/alpha/android/store/POLICY.md).
