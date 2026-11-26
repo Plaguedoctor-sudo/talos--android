@@ -50,3 +50,20 @@ PR #2 "docs: governance log for PR #1 + Task 9 C.0–C.3 gates", 2 commits (`1de
   - `key-guard`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45849072179/job/140010325558
   - `repro-independent`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45849071756/job/140010324292
 - **Direct Governance Record Push:** This record commit itself was pushed directly to `main` via repository-admin bypass at `2026-11-26T15:30:35Z`, not via PR (single-file governance record).
+- See `2026-11-26T15:54:29Z` entry for the next bypass in this sequence.
+
+---
+
+### 2026-11-26T15:54:29Z — PR #3 merged via admin bypass
+
+PR #3 "fix(repro): Docker-based build instructions; remove broken flake", 1 commit (`2c32149` on PR branch; rebased onto `main` as `5a9ff03`), merged via repository-admin bypass at `2026-11-26T15:54:29Z` onto `main` as `5a9ff03` (`5a9ff03a7b9f4188ce7ab38663524f58846c8b4c`). Reason: `C.0` (second write-access reviewer) remains unmet; the bypass path is required until it is. This is the third recorded bypass.
+
+Scope: `C.1` (`repro/README.md` Docker-based instructions) and `C.3` (removed broken `flake.nix`/`flake.lock` from `5384ebca`, which shipped with a synthetic `narHash` and a nonexistent `nixpkgs` commit).
+
+- **CI Checks Verified Green Prior to Merge:**
+  - `cross-runner-assert`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45853366085/job/140025808679
+  - `build-and-verify (ubuntu-22.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45853366085/job/140025241388
+  - `build-and-verify (ubuntu-24.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45853366085/job/140025241952
+  - `key-guard`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45853365667/job/140025240271
+  - `repro-independent`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45853365686/job/140025240079
+- **Direct Governance Record Push:** This bypass was pushed directly to `main` via repository-admin bypass at `2026-11-26T15:57:30Z` (single-file governance record; no PR warranted). The bootstrap loop terminates when `C.0` completes.
