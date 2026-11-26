@@ -8,6 +8,15 @@
 
 ---
 
+## Agent ground rules (apply to every task)
+
+1. Gates must verify artifacts (file content, blob content, binary hashes), never commit messages or diff text.
+2. Do not edit inputs to make a gate pass. If a gate is gamed, fix the gate.
+3. When two independent checks disagree, treat the stricter check as authoritative and document the discrepancy.
+4. Every claim in a Deliverable Summary that says "PASS" must be accompanied by the exact command that produced it, so an operator can re-run it on a fresh clone.
+
+---
+
 ## 1. System Vision & Sovereign Mission
 
 TALOS / LibreMobile OS is a completely un-Googled, sovereign mobile operating environment designed as a bare-metal replacement for Google Android.

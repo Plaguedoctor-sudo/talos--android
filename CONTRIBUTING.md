@@ -82,7 +82,17 @@ To prevent accidental leakage of private cryptographic keys or certificates, all
 ```bash
 ln -s ../../scripts/pre-commit-key-guard.sh .git/hooks/pre-commit
 ```
-This hook inspects all staged files and immediately blocks commits containing files matching `*.sec`, `*.pem`, `*.key`, `id_ed25519`, or `id_rsa`. Authorized test fixtures must be explicitly allowlisted in `.keyguard-allow`.
+This hook inspects all staged files and staged blob contents, immediately blocking commits containing files matching `*.sec`, `*.pem`, `*.key`, `id_ed25519`, or `id_rsa`, or blobs containing PEM private key headers. Authorized test fixtures must be explicitly allowlisted in `.keyguard-allow`.
+
+### 4.2 Verification gates must test the artifact, not the log
+
+A gate that greps `git log`, commit messages, or diff text can be satisfied by rewriting those inputs without fixing the underlying defect. This has happened once in the project's history (INC-2026-001) and must not happen again.
+
+Rules:
+- Prefer gates that inspect the current state of files, blobs, or binaries.
+- If a gate must inspect history, prefer `git rev-list --objects --all` + `git cat-file` (blob content) over `git log -p` (diff text).
+- Do not rewrite commit messages to make a gate pass. If a message is wrong, fix it in a follow-up commit and note the correction in the commit body.
+- If a gate can be satisfied by a message rewrite, the gate is broken. Fix the gate before proceeding.
 
 ---
 
