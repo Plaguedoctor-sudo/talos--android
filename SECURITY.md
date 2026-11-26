@@ -120,8 +120,47 @@ We recognize and reward security researchers who help protect TALOS users. Rewar
    - Pinned public key verification fails closed in `store/verify-index.sh` if release key is unpinned.
 4. **2026-11-25 17:30:55 UTC:** History rewritten at 2026-11-25 17:30:55 UTC. All forks, clones, and caches created before this timestamp may contain the compromised key and MUST be considered unsafe. Fork owners are asked to delete and re-fork.
 
-#### Residual exposure after history rewrite
-GitHub forks, CI caches, and third-party mirrors created before the rewrite may still retain the compromised key material in unpruned Git loose objects or cached refs. For this reason, history rewrite is necessary but not sufficient: the only safe remediation is permanent key rotation and untrusting the compromised fingerprint (as enforced by `store/POLICY.md` and `store/verify-index.sh`). Any store index signed with fingerprint `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391` is permanently rejected.
+### Residual exposure after history rewrite (INC-2026-001)
+
+**Compromised material**
+- Ed25519 private key: `store/keys/fdroid-signing.sec`
+- Detached signature produced by that key: `store/index/index.json.sig`
+
+**Exposure window (UTC)**
+- First committed: commit `82ce129` (2026-11-25 12:21:24 UTC)
+- Removed from `origin/main` history by force-push: `2026-11-25 17:30:55 UTC`
+- Total public exposure duration: 5 hours, 9 minutes, 31 seconds
+
+**What history rewrite did NOT fix**
+The rewrite purged the key from `origin/main` and its tags. It did **not** purge the key from:
+1. GitHub forks of `Plagedoctor-sudo/talos--android` created before `2026-11-25 17:30:55 UTC`.
+2. Cached checkouts in any CI system that cloned the repository before that time.
+3. Third-party mirrors, archive services, and any local clone created before that time.
+
+**Consequence for anyone holding a fork or clone made before the rewrite**
+The private key material is recoverable from those copies regardless of what `origin/main` now contains. **No TALOS client should ever trust the fingerprint `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391`**, even if a package appears to be signed by it.
+
+**Requested action for fork owners**
+Delete the fork and re-fork from `origin/main` after `2026-11-25 17:30:55 UTC`. If you cannot delete the fork (e.g., because it has commits you need), at minimum purge `store/keys/fdroid-signing.sec` and `store/index/index.json.sig` from your local history using `git filter-repo --invert-paths --path <path>` for each path.
+
+**Authoritative check that origin/main is clean (run this, not the log)**
+The following command inspects every blob in every commit reachable from any ref, which is the only verification that cannot be satisfied by rewriting commit messages:
+
+```
+git rev-list --all | xargs -n1 git ls-tree -r 2>/dev/null | awk '{print $3}' | sort -u \
+  | xargs -r -n1 git cat-file -p 2>/dev/null \
+  | grep -aE -- '-----BEGIN [A-Z ]*PRIVATE KEY-----' && echo "FAIL: private key material still present" || echo "PASS: no PEM private key material in any reachable blob"
+```
+
+**Why the earlier grep was insufficient**
+An earlier remediation reported "no PRIVATE KEY string in history" based on `git log --all -p | grep -i "PRIVATE KEY"`. That check inspects commit diff text, which the remediation then edited to remove the phrase. The check therefore passed without proving the material was gone. The command above inspects every reachable BLOB's content, which no commit-message rewrite can influence. This is the authoritative check; the log-based check has been retired.
+
+**Root-cause prevention (going forward)**
+- Pre-commit hook: `scripts/pre-commit-key-guard.sh` (installed per CONTRIBUTING.md).
+- CI guard: `.github/workflows/key-guard.yml` (runs on every push and PR).
+- Both gates check **file paths AND blob content**, not commit messages.
+
+---
 
 #### Client-Side Impact & Advisory
 - No TALOS production client should ever have trusted this key.

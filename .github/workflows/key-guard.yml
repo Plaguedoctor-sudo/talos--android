@@ -17,35 +17,6 @@ jobs:
 
       - name: Run Key Guard Check
         run: |
-          chmod +x ./scripts/pre-commit-key-guard.sh
+          chmod +x ./scripts/pre-commit-key-guard.sh ./scripts/key-guard.sh
           ./scripts/pre-commit-key-guard.sh
-
-          PROHIBITED_FILES=$(git log --all --diff-filter=A --name-only --pretty=format: | sort -u | grep -E '\.(sec|pem|key)$|id_(ed25519|rsa)$' || true)
-          if [ -n "$PROHIBITED_FILES" ]; then
-            ALLOWLIST_FILE=".keyguard-allow"
-            VIOLATIONS=""
-            while IFS= read -r file; do
-              [ -z "$file" ] && continue
-              ALLOWED=false
-              if [ -f "$ALLOWLIST_FILE" ]; then
-                while IFS= read -r pattern; do
-                  [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
-                  [ -z "$pattern" ] && continue
-                  if [[ "$file" == $pattern ]]; then
-                    ALLOWED=true
-                    break
-                  fi
-                done < "$ALLOWLIST_FILE"
-              fi
-              if [ "$ALLOWED" = false ]; then
-                VIOLATIONS="$VIOLATIONS\n$file"
-              fi
-            done <<< "$PROHIBITED_FILES"
-
-            if [ -n "$VIOLATIONS" ]; then
-              echo "::error::Prohibited key files found in commit history:"
-              echo -e "$VIOLATIONS"
-              exit 1
-            fi
-          fi
-          echo "Key guard audit clean: zero unauthorized key files."
+          bash ./scripts/key-guard.sh

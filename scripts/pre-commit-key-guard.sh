@@ -53,6 +53,13 @@ for file in $STAGED_FILES; do
             break
         fi
     done
+
+    # Also inspect staged blob content for PEM private key headers
+    if git show ":$file" 2>/dev/null | grep -aEq -- '-----BEGIN [A-Z ]*PRIVATE KEY-----'; then
+        echo "❌ PRE-COMMIT KEY GUARD BLOCKED STAGED BLOB: $file" >&2
+        echo "   Reason: Contains PEM private key header." >&2
+        FAILED=1
+    fi
 done
 
 if [ $FAILED -ne 0 ]; then

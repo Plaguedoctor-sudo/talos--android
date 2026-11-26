@@ -5,6 +5,9 @@
 # scripts/rewrite-history-for-key-removal.sh
 #
 # Removes committed secret key material from the entire Git commit history.
+# Note: The legacy string-based check (`git log --all -p | grep -i "PRIVATE KEY"`)
+# was retired in favor of the authoritative blob-content check (`make key-guard` /
+# `scripts/key-guard.sh`), which inspects every reachable Git blob directly.
 # TODO(operator): Execute this script with git-filter-repo installed to rewrite history.
 
 set -euo pipefail

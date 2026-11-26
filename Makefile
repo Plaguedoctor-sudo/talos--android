@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint hardware-matrix-check hardware-matrix-render telephony-matrix-check telephony-matrix-render audit-prep store-index store-verify store-score-test fuzz fuzz-run fuzz-smoke
+.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint key-guard hardware-matrix-check hardware-matrix-render telephony-matrix-check telephony-matrix-render audit-prep store-index store-verify store-score-test fuzz fuzz-run fuzz-smoke
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -66,6 +66,9 @@ reproducible-docker:
 
 reuse-lint:
 	$(PYTHON) scripts/reuse-lint.py
+
+key-guard:
+	bash scripts/key-guard.sh
 
 hardware-matrix-check:
 	$(PYTHON) scripts/hardware-matrix.py --check
