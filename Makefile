@@ -1,4 +1,4 @@
-.PHONY: all check test test-trust test-mobile test-attestation fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint key-guard hardware-matrix-check hardware-matrix-render telephony-matrix-check telephony-matrix-render audit-prep store-index store-verify store-score-test fuzz fuzz-run fuzz-smoke
+.PHONY: all check test test-trust test-mobile test-attestation test-guards fixture verify verify-strict build-daemons clean reproducible reproducible-verify reproducible-docker reuse-lint key-guard hardware-matrix-check hardware-matrix-render telephony-matrix-check telephony-matrix-render audit-prep store-index store-verify store-score-test fuzz fuzz-run fuzz-smoke
 
 PYTHON ?= python3
 PYTHONPATH := $(CURDIR)/.deps:$(CURDIR):$(PYTHONPATH)
@@ -31,15 +31,27 @@ build-daemons:
 	gcc -O2 -Wall mobile/firewall/lrd-firewalld.c -o mobile/firewall/lrd-firewalld
 	gcc -O2 -Wall mobile/firewall/lrd-firewall.c -o mobile/firewall/lrd-firewall
 
+test-guards:
+	$(PYTHON) -m pytest tests/test_key_guard_negative.py -v
+
 test: test-trust test-mobile
 
 verify: fixture
 	$(PYTHON) -m argus.verify.cli tests/argx/fixtures/basic.argx --keyring tests/argx/fixtures/keyring --scope-check || [ $$? -eq 1 ]
 
-verify-strict: fixture
-	$(PYTHON) -m argus.verify.cli tests/argx/fixtures/basic.argx --keyring tests/argx/fixtures/keyring --scope-check --strict || [ $$? -eq 2 ]
+VERIFY_STRICT_CMD ?= $(PYTHON) -m argus.verify.cli tests/argx/fixtures/basic.argx --keyring tests/argx/fixtures/keyring --scope-check --strict
 
-check: test-trust test-mobile verify-strict
+# verify-strict expects exit 2: GAPPED findings promote NOTICE to exit 2
+# under --strict. Exit 0 means the verifier silently accepted tampered
+# input; any other code means the verifier is broken. See CONTRIBUTING.md §4.2.
+verify-strict: fixture
+	@rc=0; $(VERIFY_STRICT_CMD) || rc=$$?; \
+	if [ $$rc -ne 2 ]; then \
+	  echo "verify-strict FAILED: expected exit 2 (GAPPED promotes NOTICE->2 under --strict), got $$rc" >&2; \
+	  exit 1; \
+	fi
+
+check: test-trust test-mobile test-guards verify-strict
 	@echo "========================================================================"
 	@echo "✔ ALL SOVEREIGN MOBILE OS SUBSYSTEMS & TRUST GATES VERIFIED SUCCESSFULLY."
 	@echo "========================================================================"
