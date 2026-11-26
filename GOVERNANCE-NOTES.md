@@ -35,3 +35,18 @@ Cross-runner reproducibility defect found and fixed. The `cross-runner-assert` j
 
 - **Gate `C.0`:** Onboard a second write-access reviewer and merge at least one PR under normal `Protect main` rules (without admin bypass) before treating governance rules as satisfied.
 - Until `C.0` is complete, any bootstrap-phase merge using the repository-admin bypass (including follow-up PRs recording prior bypasses) must be logged in this file with the same structure.
+- See `2026-11-26T15:27:41Z` entry for the next bypass in this sequence.
+
+---
+
+### 2026-11-26T15:27:41Z — PR #2 merged via admin bypass
+
+PR #2 "docs: governance log for PR #1 + Task 9 C.0–C.3 gates", 2 commits (`1de0ab0`, `79457c6` on PR branch; rebased onto `main` as `426c3f5`, `e43bbba`), merged via repository-admin bypass at `2026-11-26T15:27:41Z` onto `main` as `e43bbba` (`e43bbbaccf149b51f58151e3c49092d38445c6b9`). Reason: `C.0` (second write-access reviewer) remains unmet; the bypass path is required until it is. This is the second recorded bypass. The bootstrap loop terminates when `C.0` completes.
+
+- **CI Checks Verified Green Prior to Merge:**
+  - `cross-runner-assert`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45849071801/job/140010852537
+  - `build-and-verify (ubuntu-22.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45849071801/job/140010325040
+  - `build-and-verify (ubuntu-24.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45849071801/job/140010324416
+  - `key-guard`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45849072179/job/140010325558
+  - `repro-independent`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45849071756/job/140010324292
+- **Direct Governance Record Push:** This record commit itself was pushed directly to `main` via repository-admin bypass at `2026-11-26T15:30:35Z`, not via PR (single-file governance record).
