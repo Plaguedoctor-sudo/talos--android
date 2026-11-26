@@ -12,8 +12,6 @@ import pytest
 from store.privacy_score import score_app, score_index, SCORE_VERSION  # type: ignore
 
 DATA_DIR = Path(__file__).parent.parent / "store" / "data"
-KEYS_DIR = Path(__file__).parent.parent / "store" / "keys"
-INDEX_DIR = Path(__file__).parent.parent / "store" / "index"
 POLICY_DIR = Path(__file__).parent.parent / "security" / "egress" / "policy"
 
 
@@ -143,8 +141,8 @@ def test_signature_verification_gate(tmp_path):
     assert test_sec.is_file()
     assert test_pub.is_file()
 
-    index_file = INDEX_DIR / "index.json"
-    assert index_file.is_file(), "index.json must exist"
+    index_file = tmp_path / "index.json"
+    index_file.write_text('{"packages": [], "signed": false}\n', encoding="utf-8")
 
     test_sig = tmp_path / "index.json.sig"
     sign_index(index_file, test_sec, test_sig)
@@ -159,26 +157,43 @@ def test_signature_verification_gate(tmp_path):
     assert verify_index(index_file, tampered_sig, test_pub) is False
 
 
-def test_unsigned_graceful_degradation():
-    """When fingerprint is UNPINNED, build produces signed: false, verify exits 1, and UI path is graceful."""
+def test_unsigned_graceful_degradation(tmp_path):
+    """When fixture fingerprint is UNPINNED, build produces signed: false, verify exits 1, and UI path is graceful."""
+    import os
     import subprocess
 
-    fingerprint_file = KEYS_DIR / "fingerprint.txt"
-    assert fingerprint_file.is_file()
-    content = fingerprint_file.read_text("utf-8").strip()
-    assert "UNPINNED" in content
+    fixture_store = tmp_path / "store"
+    keys_dir = fixture_store / "keys"
+    index_dir = fixture_store / "index"
+    keys_dir.mkdir(parents=True)
+    index_dir.mkdir(parents=True)
 
-    # 1. verify-index.sh must refuse and exit 1
-    res_verify = subprocess.run(["./store/verify-index.sh"], capture_output=True, text=True)
-    assert res_verify.returncode == 1
-    assert "release key not provisioned" in res_verify.stderr or "Refusing to verify" in res_verify.stdout or "Refusing to verify" in res_verify.stderr
+    fingerprint_file = keys_dir / "fingerprint.txt"
+    fingerprint_file.write_text("UNPINNED — operator must provision release key per store/POLICY.md\n", encoding="utf-8")
 
-    # 2. index.json must report signed: false
-    index_file = INDEX_DIR / "index.json"
+    env = dict(
+        os.environ,
+        STORE_KEYS_DIR=str(keys_dir),
+        STORE_INDEX_DIR=str(index_dir),
+        SIGNING_KEY=str(tmp_path / "nonexistent-store-signing.sec"),
+    )
+
+    # 1. build-index.sh must build UNSIGNED index when fixture fingerprint is UNPINNED
+    res_build = subprocess.run(["./store/build-index.sh"], env=env, capture_output=True, text=True)
+    assert res_build.returncode == 0, res_build.stderr
+    index_file = index_dir / "index.json"
+    assert index_file.is_file()
+    assert not (index_dir / "index.json.sig").exists()
+
     with open(index_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert data.get("signed") is False
     assert data.get("signature") is None
+
+    # 2. verify-index.sh must refuse and exit 1 against the unpinned fixture
+    res_verify = subprocess.run(["./store/verify-index.sh"], env=env, capture_output=True, text=True)
+    assert res_verify.returncode == 1
+    assert "release key not provisioned" in res_verify.stderr
 
     # 3. UI app.js contains graceful unsigned handling (red banner, unverified badge, disabled install)
     app_js = Path(__file__).parent.parent / "dist" / "assets" / "app.js"
