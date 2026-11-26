@@ -112,7 +112,13 @@ We recognize and reward security researchers who help protect TALOS users. Rewar
 - **store/keys/fdroid-signing.pub:** overwritten with the new key's public half in the repository's expected format (64 lowercase hex chars + newline, 65 bytes total).
 - **Revoked material:** the previous `store/keys/fdroid-signing.pub` decoded to `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391`, which was the public half of the leaked private key. Any artifact that verifies only against that fingerprint is invalid, regardless of whether the historical `.pub` file would verify it.
 - **Private key location:** offline / air-gapped workstation, outside the repository. Not committed. Not backed up by this project.
-- **Still outstanding after this rotation:** branch protection enablement (STEP 0 checks 2a/2b) and signed attestation (STEP 0 checks 3b/3c/3d).
+- **Remaining status:** Both branch protection (this commit) and signed attestation (`54f18db`) are now complete; the only remaining operator items are those listed in the `audit/RFP.md` and `attestation/rats-verifier/` provisioning TODOs.
+
+### Branch protection enabled
+
+- **Protection enabled:** 2026-11-26T13:32:58Z (UTC)
+- **Ruleset:** `Protect main` (Enforcement: `Active`, Target: `main`, Bypass: `Repository admin` — Always allow)
+- **Rules enabled:** Restrict deletions, Require linear history, Require a pull request before merging (`approvals=1`), Require status checks to pass (`key-guard`, `repro-independent`), Block force pushes (`Require branches to be up to date`: unchecked)
 
 
 - **Affected Key:** Store Index Ed25519 Private Signing Key (`store/keys/fdroid-signing.sec`)
@@ -143,7 +149,7 @@ We recognize and reward security researchers who help protect TALOS users. Rewar
 
 **What history rewrite did NOT fix**
 The rewrite purged the key from `origin/main` and its tags. It did **not** purge the key from:
-1. GitHub forks of `Plagedoctor-sudo/talos--android` created before `2026-11-25 17:30:55 UTC`.
+1. GitHub forks of `Plaguedoctor-sudo/talos--android` created before `2026-11-25 17:30:55 UTC`.
 2. Cached checkouts in any CI system that cloned the repository before that time.
 3. Third-party mirrors, archive services, and any local clone created before that time.
 
