@@ -14,6 +14,7 @@ This ledger documents successful third-party, independent bit-for-bit rebuilds o
 | Date (UTC) | Git Release SHA | Verifier Organization / Identity | Attestation SHA-256 | Status | Run URL / Evidence |
 | :--- | :--- | :--- | :--- | :---: | :--- |
 | 2026-11-25 09:45:00 UTC | `cce901dfa964d9ffe3f1d85186c7cb4173c61570` | self (github-actions@ubuntu-24.04) | `dd00921a1ee2c3acaa1379e31acc15ba3a1dab97c2eb1316c6e22a2a3f2fe8db` | UNSIGNED SELF-CHECK | [repro-independent.yml](https://github.com/Plaguedoctor-sudo/talos--android/actions/workflows/repro-independent.yml) |
+| 2026-11-26T10:01:20Z | `cce901dfa964d9ffe3f1d85186c7cb4173c61570` | project-signer@offline-workstation | `f28831a6e60e3bcf070138a74a754596d80df1b5355eecc03d3731181047e4cf` | SIGNED SELF-CHECK | cce901dfa964d9ffe3f1d85186c7cb4173c61570 |
 
 > **Status legend**
 >
