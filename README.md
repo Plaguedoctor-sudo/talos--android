@@ -74,7 +74,6 @@ TALOS / LibreMobile OS is an open-source, bit-for-bit reproducible mobile operat
 ├── CODE_OF_CONDUCT.md            # Community standards and harassment-free pledge
 ├── TRADEMARK.md                  # Permitted uses, nominative fair use, fork renaming rules
 ├── REUSE.toml                    # Free Software Foundation Europe REUSE 3.0 license map
-├── flake.nix & flake.lock        # Hermetic NixOS 23.11 build environment
 │
 ├── mobile/                       # Native Mobile Hardware Subsystems
 │   ├── telephony/                # lrd-telephonyd daemon & CLI, capability matrix (SUPPORT.md), SMS, AT/QMI probe
@@ -124,10 +123,10 @@ TALOS / LibreMobile OS is an open-source, bit-for-bit reproducible mobile operat
 │   └── index/                    # Signed index.json and detached signature
 │
 ├── repro/                        # Bit-for-Bit Deterministic Reproducibility Suite
-│   ├── Dockerfile                # Pinned debian:bookworm-slim container fallback
+│   ├── Dockerfile                # Pinned debian:bookworm-slim hermetic build container
 │   ├── verify-attestation.py     # Stdlib Python 3 attestation auditor
 │   ├── attestation-*.json        # Published machine-verifiable attestation records
-│   └── README.md                 # One-command third-party reproduction instructions
+│   └── README.md                 # Docker-based third-party reproduction instructions
 │
 ├── scripts/                      # Operational Security Scripts
 │   ├── repro-build.sh            # Bit-for-bit deterministic image builder
@@ -254,7 +253,7 @@ make fuzz-smoke
 # 11. Run targeted fuzz harness for custom duration
 make fuzz-run TARGET=fuzz_telephony_ril DURATION=120
 
-# 12. Run dual-build bit-for-bit reproducibility verification across independent paths
+# 12. Run dual-build bit-for-bit reproducibility verification inside a Linux shell (used inside the container)
 make reproducible
 
 # 13. Audit build output directory against published attestation JSON
@@ -275,6 +274,6 @@ make test-trust
 # 18. Run the ARGUS 9-phase export verifier in strict mode
 make verify-strict
 
-# 19. Build inside the pinned fallback Docker container
+# 19. Build the pinned hermetic Docker container image (see repro/README.md to run reproducible builds inside it)
 make reproducible-docker
 ```
