@@ -105,6 +105,16 @@ We recognize and reward security researchers who help protect TALOS users. Rewar
 
 ### Incident Report: INC-2026-001 (Store Index Signing Key Exposure)
 
+### Key rotation completed
+
+- **Rotation completed:** 2026-11-26T08:20:38Z (UTC)
+- **New public key fingerprint** (SHA-256 of the decoded raw 32-byte Ed25519 public key): `28482f20bfce30989494247c5532a8273daddc9a5871348a7b2f5ada54847742`
+- **store/keys/fdroid-signing.pub:** overwritten with the new key's public half in the repository's expected format (64 lowercase hex chars + newline, 65 bytes total).
+- **Revoked material:** the previous `store/keys/fdroid-signing.pub` decoded to `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391`, which was the public half of the leaked private key. Any artifact that verifies only against that fingerprint is invalid, regardless of whether the historical `.pub` file would verify it.
+- **Private key location:** offline / air-gapped workstation, outside the repository. Not committed. Not backed up by this project.
+- **Still outstanding after this rotation:** branch protection enablement (STEP 0 checks 2a/2b) and signed attestation (STEP 0 checks 3b/3c/3d).
+
+
 - **Affected Key:** Store Index Ed25519 Private Signing Key (`store/keys/fdroid-signing.sec`)
 - **Compromised Fingerprint (SHA-256):** `d990d9b364f780f4350030968fde559414f0b275e353eb47ebb794fc672ee391`
 - **Initial Exposure Commit:** `82ce129`

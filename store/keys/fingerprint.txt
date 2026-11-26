@@ -1,1 +1,1 @@
-UNPINNED — operator must provision release key per store/POLICY.md
+28482f20bfce30989494247c5532a8273daddc9a5871348a7b2f5ada54847742
