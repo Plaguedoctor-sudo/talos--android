@@ -9,8 +9,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-KEYS_DIR="$SCRIPT_DIR/keys"
-INDEX_DIR="$SCRIPT_DIR/index"
+KEYS_DIR="${STORE_KEYS_DIR:-$SCRIPT_DIR/keys}"
+INDEX_DIR="${STORE_INDEX_DIR:-$SCRIPT_DIR/index}"
 
 PUBKEY="$KEYS_DIR/fdroid-signing.pub"
 FINGERPRINT_FILE="$KEYS_DIR/fingerprint.txt"

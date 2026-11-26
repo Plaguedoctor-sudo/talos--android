@@ -12,9 +12,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-DATA_DIR="$SCRIPT_DIR/data"
-KEYS_DIR="$SCRIPT_DIR/keys"
-INDEX_DIR="$SCRIPT_DIR/index"
+DATA_DIR="${STORE_DATA_DIR:-$SCRIPT_DIR/data}"
+KEYS_DIR="${STORE_KEYS_DIR:-$SCRIPT_DIR/keys}"
+INDEX_DIR="${STORE_INDEX_DIR:-$SCRIPT_DIR/index}"
 UPSTREAM_CACHE="$DATA_DIR/upstream-index.json"
 TRACKERS_DB="$DATA_DIR/trackers.json"
 POLICY_DIR="$REPO_ROOT/security/egress/policy"
