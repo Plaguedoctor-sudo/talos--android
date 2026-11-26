@@ -111,9 +111,24 @@ jobs:
           UTC_NOW=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
           RUNNER_ID="GitHub-Actions-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}"
 
+          STATUS_LABEL="UNSIGNED SELF-CHECK"
+          FINGERPRINT_FILE="store/keys/fingerprint.txt"
+          PUBKEY_FILE="store/keys/fdroid-signing.pub"
+          ATTESTATION_SIG="${ATTESTATION}.sig"
+          if [ -f "$FINGERPRINT_FILE" ] && ! grep -q "UNPINNED" "$FINGERPRINT_FILE"; then
+            EXPECTED_FP=$(tr -d '[:space:]' < "$FINGERPRINT_FILE")
+            if [ -f "$PUBKEY_FILE" ] && [ -f "$ATTESTATION_SIG" ]; then
+              ACTUAL_FP=$(python3 -c 'import hashlib, sys; print(hashlib.sha256(bytes.fromhex(open(sys.argv[1]).read().strip())).hexdigest())' "$PUBKEY_FILE" 2>/dev/null || true)
+              if [ -n "$EXPECTED_FP" ] && [ "$EXPECTED_FP" = "$ACTUAL_FP" ] && \
+                 python3 store/sign-index.py verify --index "$ATTESTATION" --sig "$ATTESTATION_SIG" --pubkey "$PUBKEY_FILE" >/dev/null 2>&1; then
+                STATUS_LABEL="SIGNED SELF-CHECK"
+              fi
+            fi
+          fi
+
           echo "=========================================================================="
-          echo "INDEPENDENT VERIFICATION SUCCESSFUL"
-          echo "| $UTC_NOW | $RELEASE_SHA | $RUNNER_ID | $ATTESTATION_HASH | PASS | $RUN_URL |"
+          echo "REPRODUCIBILITY SELF-CHECK COMPLETE ($STATUS_LABEL)"
+          echo "| $UTC_NOW | $RELEASE_SHA | self (github-actions@$RUNNER_ID) | $ATTESTATION_HASH | $STATUS_LABEL | $RUN_URL |"
           echo "=========================================================================="
 
       - name: Exit Notice If No Release Attestation

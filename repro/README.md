@@ -166,6 +166,8 @@ python3 repro/verify-attestation.py repro/attestation-$(git rev-parse HEAD).json
 Independent verifiers who successfully reproduce the binary artifacts are encouraged to log their results in the public ledger:
 - **[repro/THIRD-PARTY-VERIFICATIONS.md](file:///home/alpha/android/repro/THIRD-PARTY-VERIFICATIONS.md)**
 
+A ledger entry labeled UNSIGNED SELF-CHECK is not a trust signal. It is a record that the project's own CI ran a consistency check. Do not cite this ledger as evidence of trustworthiness until at least one SIGNED SELF-CHECK and one INDEPENDENT VERIFICATION entry exist.
+
 ### Reporting Hash Discrepancies
 If your build produces non-identical artifact digests, do not ignore the deviation. Submit a detailed discrepancy report using the structured issue template:
 - **[.github/ISSUE_TEMPLATE/repro-mismatch.yml](file:///home/alpha/android/.github/ISSUE_TEMPLATE/repro-mismatch.yml)**
