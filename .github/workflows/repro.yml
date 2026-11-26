@@ -26,28 +26,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Build Prerequisites
+      - name: Build Hermetic Repro Container
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            gcc \
-            make \
-            python3 \
-            nodejs \
-            npm \
-            e2fsprogs \
-            tar \
-            xz-utils \
-            diffutils
+          make reproducible-docker
 
-      - name: Run Dual-Build Reproducibility Suite
+      - name: Run Dual-Build Reproducibility Suite (Pinned Container)
         run: |
-          make reproducible
+          docker run --rm \
+            -u "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            --entrypoint /bin/bash \
+            talos-repro:latest \
+            -c "make reproducible"
 
       - name: Audit Build A Against Published Attestation
         run: |
-          python3 repro/verify-attestation.py repro/attestation-$(git rev-parse HEAD).json out/a
+          docker run --rm \
+            -u "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            --entrypoint /bin/bash \
+            talos-repro:latest \
+            -c "python3 repro/verify-attestation.py repro/attestation-\$(git rev-parse HEAD).json out/a"
 
       - name: Upload Attestation Record
         uses: actions/upload-artifact@v4

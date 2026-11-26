@@ -6,7 +6,7 @@
 # TODO(operator): Pin can be refreshed when advancing Debian toolchain baselines
 # ==============================================================================
 
-FROM debian:bookworm-slim@sha256:d6b63d0b28dd46b2b41295fc6eb894819d45e0f7797e594d2f8319e7ff19c35b
+FROM debian:bookworm-slim@sha256:e67eeead736ff7bbe258ef088bff683635c561b1fcfefad0806c1df4ab49ce0e
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=UTC \
@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xz-utils \
     diffutils \
     ca-certificates \
+    && git config --system --add safe.directory /workspace \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
