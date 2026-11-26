@@ -412,8 +412,6 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
 #### 1. Root Workspace Orchestration
 - **[Makefile](file:///home/alpha/android/Makefile)** (2,182 B | 45 lines)
   - *Aim:* Master build, test, and verification automation. Drives `make check`, `make test-mobile`, `make test-trust`, `make build-daemons`, `make verify-strict`, and `make reproducible`.
-- **[flake.nix](file:///home/alpha/android/flake.nix)** & **[flake.lock](file:///home/alpha/android/flake.lock)**
-  - *Aim:* Hermetic build environment pinning NixOS 23.11 toolchains (gcc, make, node, python3, e2fsprogs, android-tools) for bit-for-bit reproduction across distributions.
 - **[README.md](file:///home/alpha/android/README.md)** (12,825 B | 150 lines)
   - *Aim:* Primary human-facing architectural specification, system mission statement, hardware matrix, operator manual, and reproducible build guide.
 - **[AI_CONTEXT.md](file:///home/alpha/android/AI_CONTEXT.md)** (24,317+ B)
@@ -427,11 +425,11 @@ dist/                          4         9.0 KB      333  Bundled Wayland touch 
 
 #### 1.1. Deterministic Reproducibility & Attestation (`repro/`)
 - **[repro/Dockerfile](file:///home/alpha/android/repro/Dockerfile)**
-  - *Aim:* Fallback container environment pinning `debian:bookworm-slim` by SHA-256 digest (`sha256:d6b63d0b28...`) for reproducible builds without Nix.
+  - *Aim:* Hermetic container environment pinning `debian:bookworm-slim` by SHA-256 digest (`sha256:e67eeead73...`) for reproducible builds across host distributions.
 - **[repro/verify-attestation.py](file:///home/alpha/android/repro/verify-attestation.py)**
   - *Aim:* Standard-library-only Python 3 verifier that re-hashes local build outputs against a machine-verifiable attestation JSON and audits zero divergence.
 - **[repro/README.md](file:///home/alpha/android/repro/README.md)**
-  - *Aim:* Comprehensive third-party audit manual detailing single-command rebuild workflows via Nix, Docker, or native host.
+  - *Aim:* Comprehensive third-party audit manual detailing Docker-based hermetic rebuild and attestation verification workflows.
 - **[.github/workflows/repro.yml](file:///home/alpha/android/.github/workflows/repro.yml)**
   - *Aim:* Continuous integration workflow running a 2-runner matrix (`ubuntu-22.04` and `ubuntu-24.04`) asserting cross-distribution bit-for-bit equality.
 

@@ -43,7 +43,7 @@ body:
     attributes:
       label: Build Environment & Toolchain Details
       description: OS distribution, kernel version, gcc version, e2fsprogs version, container runtime.
-      placeholder: e.g. Debian 12 (bookworm), Linux 6.6.x, GCC 12.2.0, docker / nix
+      placeholder: e.g. Debian 12 (bookworm), Linux 6.6.x, GCC 12.2.0, docker
     validations:
       required: true
   - type: input

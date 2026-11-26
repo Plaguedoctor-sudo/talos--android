@@ -55,7 +55,7 @@ timeline
 - **Acceptance Gate:** 100/100 automated mobile and trust verification tests passing (`make check`).
 
 ### Phase 2: Hermetic Reproducibility & Supply Chain Security (Status: COMPLETED)
-- **Hermetic Build Environment:** `flake.nix` pinning exact compiler and system toolchain hashes; containerized Debian bookworm-slim fallback (`repro/Dockerfile`).
+- **Hermetic Build Environment:** Digest-pinned `debian:bookworm-slim` container ([`repro/Dockerfile`](file:///home/alpha/android/repro/Dockerfile)) locking exact compiler and system toolchain versions across host distributions.
 - **Deterministic Toolchain:** Enforced `SOURCE_DATE_EPOCH`, UTC normalization, GCC path prefix mapping (`-ffile-prefix-map`), deterministic tar sorting, and ext4 filesystem hash seeds.
 - **Two-Pass Verification:** `scripts/repro-attest.sh` compiling into isolated paths `out/a` and `out/b`, validating byte-identical artifacts.
 - **Machine Attestation:** Python stdlib validator `repro/verify-attestation.py` verifying `repro/attestation-<git-sha>.json`.

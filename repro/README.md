@@ -9,63 +9,56 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
 
-## 1. Third-Party Rebuild in One Command
+## 1. Prerequisites
 
-An auditor or downstream user can independently verify and reproduce the entire operating system image in a single command using any of the following three workflows:
+To reproduce and verify TALOS / LibreMobile OS builds identically across Linux distributions, you need only:
 
-### Method A: Hermetic Nix Environment (Primary & Recommended)
+- **Docker** (Docker Engine or compatible runtime) installed and running
+- **~500 MB** free disk space for the pinned `debian:bookworm-slim` container image and toolchain layers
+- **Git** (to clone the repository and resolve commit metadata)
 
-Using the pinned Nix flake (`nixpkgs` release `nixos-23.11` via `flake.lock`):
+> **Why Docker, not Nix:** The previous Nix configuration was removed (`C.3`) because its lockfile pinned a nonexistent upstream `nixpkgs` revision with a synthetic `narHash`, and CI validates only one hermetic environment. The digest-pinned Debian bookworm container ([`repro/Dockerfile`](Dockerfile)) is the single supported, CI-verified hermetic build path. Nix support may return in the future only alongside CI coverage proving cross-environment equivalence.
 
-```bash
-# Clone the repository
-git clone https://github.com/talos-os/android.git && cd android
-
-# Execute dual-build reproducibility verification inside hermetic nix shell
-nix develop --command make reproducible
-```
-
-Or build the target directly with pure Nix:
-```bash
-nix build
-```
+> **Do not use host toolchains:** Compiling directly on a host OS (`gcc`, `glibc`, `e2fsprogs`) produces binaries and ext4 filesystem images that diverge across Linux distributions (for example, Ubuntu 22.04 vs. Ubuntu 24.04). Always execute reproduction and verification inside the pinned container below.
 
 ---
 
-### Method B: Pinned Container Environment (Fallback)
+## 2. Third-Party Rebuild in Two Commands (Pinned Docker Container)
 
-Using the digest-pinned `debian:bookworm-slim` image:
+Every build step — native C daemons, Project Treble ext4 image assembly, `.tar.xz` device bundles, metadata, and `SHA256SUMS.txt` — runs inside the `debian:bookworm-slim@sha256:e67eeead736ff7bbe258ef088bff683635c561b1fcfefad0806c1df4ab49ce0e` container defined in [`repro/Dockerfile`](Dockerfile):
 
 ```bash
-# Run one-command reproducible build and attestation verification
+# 1. Fresh clone
+git clone https://github.com/Plaguedoctor-sudo/talos--android.git
+cd talos--android
+
+# 2. Build the pinned hermetic container image (talos-repro:latest)
 make reproducible-docker
+# (Without make on host: docker build -f repro/Dockerfile -t talos-repro:latest .)
+
+# 3. Execute dual-build reproducibility verification inside the container
+docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD:/workspace" -w /workspace \
+  --entrypoint /bin/bash talos-repro:latest -c "make reproducible"
+
+# 4. Verify Build A outputs against the generated attestation inside the container
+docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD:/workspace" -w /workspace \
+  --entrypoint /bin/bash talos-repro:latest \
+  -c "python3 repro/verify-attestation.py repro/attestation-\$(git rev-parse HEAD).json out/a"
 ```
 
-Or directly via Docker/Podman:
-```bash
-docker build -t talos-repro -f repro/Dockerfile .
-docker run --rm talos-repro
-```
+> **Rootless Podman note:** If your `docker` CLI is rootless Podman (`Emulate Docker CLI using podman`), omit `-u "$(id -u):$(id -g)"` (or pass `--userns=keep-id`) so the container keeps write permissions on the bind-mounted `/workspace` directory.
+
+When auditing a published release commit `<release-sha>` rather than `HEAD`, check out `<release-sha>` cleanly first and pass `repro/attestation-<release-sha>.json` to `repro/verify-attestation.py` inside step 4.
+
+> **Historical attestation note:** [`attestation-cce901dfa964d9ffe3f1d85186c7cb4173c61570.json`](attestation-cce901dfa964d9ffe3f1d85186c7cb4173c61570.json) predates the container migration (`adcd4f8`) and was generated under an Ubuntu 24.04 host toolchain. Regenerating and signing a new release attestation from the pinned Docker build is tracked under gate `C.2` in [`docs/TASK9-SCOPE.md`](../docs/TASK9-SCOPE.md).
 
 ---
 
-### Method C: Native Linux Workstation
+## 3. Deterministic Build Pillars
 
-On any Linux machine with standard build tools (`gcc`, `make`, `python3`, `nodejs`, `e2fsprogs`):
-
-```bash
-# 1. Run dual build (Path A vs Path B) and generate attestation
-make reproducible
-
-# 2. Verify all artifacts against the generated attestation
-python3 repro/verify-attestation.py repro/attestation-$(git rev-parse HEAD).json out/a
-```
-
----
-
-## 2. Deterministic Build Pillars
-
-TALOS achieves bit-for-bit reproducibility through three strict technical guardrails implemented in [scripts/repro-build.sh](file:///home/alpha/android/scripts/repro-build.sh):
+Inside the pinned container, TALOS achieves bit-for-bit reproducibility through three strict technical guardrails implemented in [`scripts/repro-build.sh`](../scripts/repro-build.sh):
 
 1. **Epoch & Locale Pinning**:
    - `SOURCE_DATE_EPOCH` is derived from the latest git commit timestamp (`git log -1 --format=%ct`).
@@ -83,14 +76,17 @@ TALOS achieves bit-for-bit reproducibility through three strict technical guardr
 
 ---
 
-## 3. Verifying an Attestation Record
+## 4. Verifying an Attestation Record
 
-Every execution of `make reproducible` outputs an attestation JSON in [repro/](file:///home/alpha/android/repro) named `attestation-<git-sha>.json`.
+Executing `make reproducible` inside the `talos-repro:latest` container builds `out/a` and `out/b` from independent paths, asserts byte-for-byte equality via `diff -r`, and writes `repro/attestation-<git-sha>.json`.
 
-To audit a local build directory (e.g. `out/a`) against an attestation record:
+To audit the container build directory (`out/a`) against an attestation record using the container runtime:
 
 ```bash
-python3 repro/verify-attestation.py repro/attestation-<git-sha>.json out/a
+docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD:/workspace" -w /workspace \
+  --entrypoint /bin/bash talos-repro:latest \
+  -c "python3 repro/verify-attestation.py repro/attestation-<git-sha>.json out/a"
 ```
 
 ### Attestation Schema
@@ -105,22 +101,21 @@ The attestation JSON follows this schema:
     "gcc": "gcc (Debian 12.2.0-14) 12.2.0",
     "make": "GNU Make 4.3",
     "mke2fs": "mke2fs 1.47.0 (5-Feb-2023)",
-    "node": "v20.18.0",
-    "python3": "Python 3.12.3"
+    "node": "v18.19.0",
+    "python3": "Python 3.11.2"
   },
   "diff_result": "IDENTICAL",
   "artifacts_verified_count": 20,
   "per_artifact_sha256": {
     "images/libredroid-mobile-arm64-treble.img": "4be9363e8a7fd056...",
-    "daemons/lrd-telephonyd": "8e082f674c3e2532...",
-    ...
+    "daemons/lrd-telephonyd": "8e082f674c3e2532..."
   }
 }
 ```
 
 ---
 
-## 4. Published Artifact Verification Table
+## 5. Published Artifact Verification Table
 
 Artifacts audited and matched bit-for-bit:
 
@@ -139,35 +134,18 @@ Artifacts audited and matched bit-for-bit:
 | **Metadata** | `release/verity-table.json` | dm-verity cryptographic verification parameters |
 | **Manifest** | `SHA256SUMS.txt` | Complete cryptographic hash digest index |
 
-> **TODO(operator):** Sign release attestations with the official TALOS Ed25519 offline root key using `signify` or `gpg --detach-sign`.
-
 ---
 
-## 5. Third-Party Independent Verification
+## 6. Third-Party Independent Verification
 
-An attestation is only meaningful when verified by a machine that is not the one that produced it. The GitHub Actions job `repro-independent` runs this verification on every push.
-
-### Exact Instructions for External Verifiers
-If you are an external auditor, downstream packager, or community verifier auditing on a clean, independent machine:
-
-```bash
-# 1. Fresh clone on clean hardware
-git clone https://github.com/Plaguedoctor-sudo/talos--android.git
-cd talos--android
-
-# 2. Execute bit-for-bit build in pinned container
-make reproducible-docker
-
-# 3. Verify resulting artifacts against committed attestation
-python3 repro/verify-attestation.py repro/attestation-$(git rev-parse HEAD).json out/a
-```
+An attestation is only meaningful when verified by an entity independent of the maintainers on separate infrastructure. CI validates cross-distribution hermeticity via [`.github/workflows/repro.yml`](../.github/workflows/repro.yml) (`ubuntu-22.04` and `ubuntu-24.04` running inside [`repro/Dockerfile`](Dockerfile), asserted identical by `cross-runner-assert`).
 
 ### Public Verification Ledger
 Independent verifiers who successfully reproduce the binary artifacts are encouraged to log their results in the public ledger:
-- **[repro/THIRD-PARTY-VERIFICATIONS.md](file:///home/alpha/android/repro/THIRD-PARTY-VERIFICATIONS.md)**
+- **[`repro/THIRD-PARTY-VERIFICATIONS.md`](THIRD-PARTY-VERIFICATIONS.md)**
 
-A ledger entry labeled UNSIGNED SELF-CHECK is not a trust signal. It is a record that the project's own CI ran a consistency check. Do not cite this ledger as evidence of trustworthiness until at least one SIGNED SELF-CHECK and one INDEPENDENT VERIFICATION entry exist.
+A ledger entry labeled `UNSIGNED SELF-CHECK` is not a trust signal — it is only a consistency check by the project's own CI. Cite only `INDEPENDENT VERIFICATION` entries verified against signed attestations.
 
 ### Reporting Hash Discrepancies
-If your build produces non-identical artifact digests, do not ignore the deviation. Submit a detailed discrepancy report using the structured issue template:
-- **[.github/ISSUE_TEMPLATE/repro-mismatch.yml](file:///home/alpha/android/.github/ISSUE_TEMPLATE/repro-mismatch.yml)**
+If your containerized build produces non-identical artifact digests, submit a detailed discrepancy report using the structured issue template:
+- **[`.github/ISSUE_TEMPLATE/repro-mismatch.yml`](../.github/ISSUE_TEMPLATE/repro-mismatch.yml)**
