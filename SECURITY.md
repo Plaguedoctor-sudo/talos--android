@@ -176,6 +176,8 @@ An earlier remediation reported "no PRIVATE KEY string in history" based on `git
 - CI guard: `.github/workflows/key-guard.yml` (runs on every push and PR).
 - Both gates check **file paths AND blob content**, not commit messages.
 
+Governance deviations (including admin-bypass merges) are logged in GOVERNANCE-NOTES.md.
+
 ---
 
 #### Client-Side Impact & Advisory
