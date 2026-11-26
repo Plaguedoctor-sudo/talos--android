@@ -45,12 +45,18 @@ if [[ -n "${PROHIBITED_FILES}" ]]; then
 fi
 
 # 2. Fail if any blob reachable from any ref contains PEM private key material.
-leaked="$(git rev-list --all | xargs -r -n1 git ls-tree -r 2>/dev/null | awk '{print $3}' | sort -u \
-  | xargs -r -n1 git cat-file -p 2>/dev/null \
-  | grep -aE -- '-----BEGIN [A-Z ]*PRIVATE KEY-----' || true)"
-if [[ -n "${leaked}" ]]; then
-  echo "FAIL: PEM private key material present in reachable git blobs." >&2
-  echo "${leaked}" | head -5 >&2
+ALL_BLOBS="$(git rev-list --all | xargs -r -n1 git ls-tree -r 2>/dev/null | awk '{print $3}' | sort -u)"
+if [[ -n "${ALL_BLOBS}" ]] && printf '%s\n' "${ALL_BLOBS}" | xargs -r -n1 git cat-file -p 2>/dev/null \
+  | grep -aEq -- '-----BEGIN [A-Z ]*PRIVATE KEY-----'; then
+  echo "FAIL: PEM private key material present in reachable git blobs:" >&2
+  while IFS= read -r blob_sha; do
+    [[ -z "${blob_sha}" ]] && continue
+    if git cat-file -p "${blob_sha}" 2>/dev/null | grep -aEq -- '-----BEGIN [A-Z ]*PRIVATE KEY-----'; then
+      git rev-list --all | xargs -r -n1 git ls-tree -r 2>/dev/null \
+        | awk -v sha="${blob_sha}" '$3 == sha { sub(/^[^\t]*\t/, ""); print "  " $0 " (blob " sha ")" }' \
+        | sort -u | head -10 >&2
+    fi
+  done <<< "${ALL_BLOBS}"
   exit 1
 fi
 
