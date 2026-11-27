@@ -84,6 +84,7 @@ This PR fixed the last cross-runner reproducibility defect (`scripts/repro-build
   - `key-guard`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45937281742/job/140303310281
   - `repro-independent`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45937281822/job/140303310470
 - **Direct Governance Record Push:** This bypass was pushed directly to `main` via repository-admin bypass on `2026-11-27T04:24Z` (single-file governance record; no PR warranted). The bootstrap loop terminates when `C.0` completes.
+- See `2026-11-27T04:44:58Z` entry for the next bypass in this sequence.
 
 ### Reproducibility findings summary (five findings, all fixed)
 
@@ -96,3 +97,41 @@ The bit-for-bit reproducible claim was first tested end-to-end on PR #1. Five fi
 5. Container toolchain hermetic but file staging UID-dependent (`mke2fs -E root_owner=0:0` sets only `ino 2`, leaving non-root inodes with host/container UID/GID) — fixed by post-`mke2fs` inode-table rewrite + `umask 022` + rootfs mode normalization in PR #4 (`33c6024` / `c155c6d`).
 
 Each finding converted the reproducibility claim from narrative to artifact. The CI gates caught every one.
+
+---
+
+### 2026-11-27T04:44:58Z — PR #5 merged via admin bypass (fifth bypass)
+
+PR #5 "feat(repro): regenerate release attestation from hermetic build at 6256184" (`feat/regenerate-attestation-post-uid-fix` → `main`), 1 commit (`f80b43c` on PR branch; rebased onto `main` as `dd21a63`), merged via repository-admin bypass at `2026-11-27T04:44:58Z` onto `main` as `dd21a63` (`dd21a636095695f85c1f1f32ce2f3a6bdad57567`). Reason: `C.0` (second write-access reviewer) remains unmet. Landed the first release attestation produced by the UID-independent hermetic Docker build ([`repro/attestation-62561843aa9e08c14415d0e0f0a963b269ae1a90.json`](repro/attestation-62561843aa9e08c14415d0e0f0a963b269ae1a90.json) and [`repro/attestation-latest.json`](repro/attestation-latest.json)), verified 20/20 by `repro-independent` on CI.
+
+- **CI Checks Verified Green Prior to Merge:**
+  - `cross-runner-assert`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45941190507/job/140315881684
+  - `build-and-verify (ubuntu-22.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45941190507/job/140315642083
+  - `build-and-verify (ubuntu-24.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45941190507/job/140315641726
+  - `key-guard`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45941190461/job/140315641956
+  - `repro-independent`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45941190456/job/140315641621
+- See `2026-11-27T04:59:50Z` entry for the next bypass in this sequence.
+
+---
+
+### 2026-11-27T04:59:50Z — PR #6 merged via admin bypass (sixth bypass)
+
+PR #6 "security: fix sign-index.py raw-key support + sign hermetic-build attestation" (`security/sign-hermetic-attestation` → `main`), 3 commits (`d53df0c`, `bec6c48`, `abccb12` on PR branch; rebased onto `main` as `b48467b`, `2b74533`, `0de6148`), merged via repository-admin bypass at `2026-11-27T04:59:50Z` onto `main` as `0de6148` (`0de61488a9524048d168b0975bcca0053dfcf9bb`). Reason: `C.0` (second write-access reviewer) remains unmet.
+
+Scope: signed the hermetic-build attestation ([`repro/attestation-62561843aa9e08c14415d0e0f0a963b269ae1a90.json.sig`](repro/attestation-62561843aa9e08c14415d0e0f0a963b269ae1a90.json.sig)) and recorded the first `SIGNED SELF-CHECK` in [`repro/THIRD-PARTY-VERIFICATIONS.md`](repro/THIRD-PARTY-VERIFICATIONS.md#L18) that reflects a genuinely reproducible build. Also fixed [`store/sign-index.py`](store/sign-index.py#L90-L122) to accept raw 32-byte Ed25519 private keys (previously assumed hex-encoded UTF-8, which failed with `UnicodeDecodeError` on the rotated key), backed by `test_sign_with_raw_32byte_key` in [`tests/test_store_scoring.py`](tests/test_store_scoring.py#L160-L197).
+
+Note: this is the first ledger entry in the project's history where the verified build was produced by a reproducible method (UID-independent Docker build at `33c6024` / `c155c6d`, verified cross-host by `cross-runner-assert`). The prior `SIGNED SELF-CHECK` at `cce901d` was self-consistent but did not survive cross-environment verification.
+
+- **CI Checks Verified Green Prior to Merge:**
+  - `cross-runner-assert`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45943003468/job/140321545743
+  - `build-and-verify (ubuntu-22.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45943003468/job/140321315595
+  - `build-and-verify (ubuntu-24.04)`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45943003468/job/140321315794
+  - `key-guard`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45943003457/job/140321315485
+  - `repro-independent`: https://github.com/Plaguedoctor-sudo/talos--android/actions/runs/45943003515/job/140321315667
+- **Direct Governance Record Push:** This combined PR #5 and PR #6 bypass record was pushed directly to `main` via repository-admin bypass on `2026-11-27T05:03Z` (single-file governance record; no PR warranted).
+
+---
+
+### Bootstrap Bypass Summary (`C.0` Gate Status)
+
+As of `0de6148`, PRs #1 through #6 have all been merged via admin bypass. `C.0` (second write-access reviewer) remains the sole unmet gate. Once `C.0` completes and one PR merges under normal rules, this file's bypass log will be closed.
