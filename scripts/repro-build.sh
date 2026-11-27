@@ -16,6 +16,7 @@ mkdir -p "$TARGET_OUT"
 TARGET_OUT="$(cd "$TARGET_OUT" && pwd)"
 
 # 1. Deterministic Environment & Epoch Pinning
+umask 022
 export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git -C "$REPO_ROOT" log -1 --format=%ct 2>/dev/null || echo 1700000000)}"
 export TZ="UTC"
 export LC_ALL="C"
@@ -96,7 +97,11 @@ with open(sys.argv[2], "wb") as f:
     f.write(buf.getvalue())
 ' "$SOURCE_DATE_EPOCH" "$ROOTFS/system/etc/security/otacerts.zip"
 
-# Normalize all timestamps and permissions across rootfs tree
+# Normalize all permissions, ownership (where permitted), and timestamps across rootfs tree
+find "$ROOTFS" -type d -exec chmod 0755 {} +
+find "$ROOTFS" -type f -perm /111 -exec chmod 0755 {} +
+find "$ROOTFS" -type f ! -perm /111 -exec chmod 0644 {} +
+find "$ROOTFS" -exec chown -h 0:0 {} + 2>/dev/null || true
 find "$ROOTFS" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
 
 # Derive deterministic UUID and hash_seed from SOURCE_DATE_EPOCH
@@ -123,31 +128,53 @@ mke2fs -t ext4 \
 
 rm -rf "$ROOTFS"
 
-# Normalize ext4 filesystem inodes (ensures ctime / subsecond timestamps match SOURCE_DATE_EPOCH)
+# Normalize ext4 filesystem inodes (ensures UID/GID 0:0 and ctime / subsecond timestamps match SOURCE_DATE_EPOCH)
 python3 -c '
 import struct, sys
 img_path = sys.argv[1]
 epoch = int(sys.argv[2])
 with open(img_path, "r+b") as f:
     data = bytearray(f.read())
-    for offset in range(0, len(data), 256):
-        mode = struct.unpack("<H", data[offset:offset+2])[0]
-        if mode != 0 and (mode & 0xF000) in (0x8000, 0x4000, 0xA000):
-            struct.pack_into("<III", data, offset+0x08, epoch, epoch, epoch)
-            if offset + 0x80 <= len(data):
-                for extra_off in (0x74, 0x78, 0x7c):
-                    if offset + extra_off + 4 <= len(data):
-                        struct.pack_into("<I", data, offset+extra_off, 0)
+    sb = data[1024:2048]
+    blocks_count = struct.unpack_from("<I", sb, 0x04)[0]
+    blocks_per_group = struct.unpack_from("<I", sb, 0x20)[0]
+    inodes_per_group = struct.unpack_from("<I", sb, 0x28)[0]
+    inode_size = struct.unpack_from("<H", sb, 0x58)[0]
+    desc_size = struct.unpack_from("<H", sb, 0xfe)[0] or 32
+    num_groups = (blocks_count + blocks_per_group - 1) // blocks_per_group
+    for g in range(num_groups):
+        gd_off = 4096 + g * desc_size
+        itable_lo = struct.unpack_from("<I", data, gd_off + 0x08)[0]
+        itable_hi = struct.unpack_from("<I", data, gd_off + 0x28)[0] if desc_size >= 64 else 0
+        itable_off = ((itable_hi << 32) | itable_lo) * 4096
+        itable_end = min(len(data), itable_off + inodes_per_group * inode_size)
+        for offset in range(itable_off, itable_end, inode_size):
+            mode = struct.unpack_from("<H", data, offset)[0]
+            if mode != 0 and (mode & 0xF000) in (0x8000, 0x4000, 0xA000):
+                # Force UID=0 (i_uid at +0x02) and GID=0 (i_gid at +0x18) regardless of host/container UID
+                struct.pack_into("<H", data, offset + 0x02, 0)
+                struct.pack_into("<H", data, offset + 0x18, 0)
+                # Force atime, ctime, mtime to SOURCE_DATE_EPOCH
+                struct.pack_into("<III", data, offset + 0x08, epoch, epoch, epoch)
+                if inode_size >= 0x80:
+                    # Zero l_i_blocks_high/acl_high (+0x74), l_i_uid_high/gid_high (+0x78), checksum_lo (+0x7c)
+                    for extra_off in (0x74, 0x78, 0x7c):
+                        struct.pack_into("<I", data, offset + extra_off, 0)
+                if inode_size >= 0x98:
+                    # Zero subsecond extra timestamps (+0x84..+0x8c, +0x94) and normalize crtime (+0x90)
+                    struct.pack_into("<IIIII", data, offset + 0x84, 0, 0, 0, epoch, 0)
     f.seek(0)
     f.write(data)
 ' "$GSI_IMG" "$SOURCE_DATE_EPOCH"
 
+chmod 0644 "$GSI_IMG"
 touch -h -d "@$SOURCE_DATE_EPOCH" "$GSI_IMG"
 
 # 6. Assemble Release Bundle Artifacts
 echo ">>> Assembling deterministic release bundle and device tarballs..."
 GENERIC_ROOTFS="${TARGET_OUT}/release/libremobile-arm64-generic.img"
 cp "$GSI_IMG" "$GENERIC_ROOTFS"
+chmod 0644 "$GENERIC_ROOTFS"
 touch -h -d "@$SOURCE_DATE_EPOCH" "$GENERIC_ROOTFS"
 
 # Generate deterministic boot images for target test devices
@@ -179,6 +206,7 @@ with open(sys.argv[1], "wb") as f:
     f.write(hdr_padded + ramdisk)
 ' "$VENDOR_BOOT_IMG"
 
+    chmod 0644 "$BOOT_IMG" "$VENDOR_BOOT_IMG"
     touch -h -d "@$SOURCE_DATE_EPOCH" "$BOOT_IMG" "$VENDOR_BOOT_IMG"
 
     # Deterministic tar packaging
@@ -188,11 +216,13 @@ with open(sys.argv[1], "wb") as f:
         --owner=0 \
         --group=0 \
         --numeric-owner \
+        --format=gnu \
         -cJf "$TARBALL" \
         -C "${TARGET_OUT}/release" \
         "boot-${codename}-libremobile.img" \
         "vendor_boot-${codename}-libremobile.img" \
         "libremobile-arm64-generic.img"
+    chmod 0644 "$TARBALL"
     touch -h -d "@$SOURCE_DATE_EPOCH" "$TARBALL"
 done
 
