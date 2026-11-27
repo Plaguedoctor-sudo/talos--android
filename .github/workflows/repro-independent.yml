@@ -22,26 +22,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Build Prerequisites
+      - name: Build Hermetic Repro Container
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            gcc \
-            make \
-            python3 \
-            nodejs \
-            npm \
-            e2fsprogs \
-            tar \
-            xz-utils \
-            diffutils \
-            git
+          make reproducible-docker
 
       - name: Build Current Commit & Compute Hashes
         run: |
           mkdir -p out/current
-          ./scripts/repro-build.sh out/current
+          docker run --rm \
+            -u "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            --entrypoint /bin/bash \
+            talos-repro:latest \
+            -c "./scripts/repro-build.sh out/current"
           echo "Current commit build completed successfully."
 
       - name: Publish Current Commit Build Artifacts & Hashes
@@ -96,12 +91,22 @@ jobs:
         run: |
           RELEASE_SHA="${{ steps.find_release.outputs.release_sha }}"
           ATTESTATION="${{ steps.find_release.outputs.attestation_file }}"
-          echo "Checking out release $RELEASE_SHA in detached worktree..."
-          git worktree add /tmp/release-worktree "$RELEASE_SHA"
+          echo "Checking out release $RELEASE_SHA in isolated clean clone..."
+          rm -rf /tmp/release-worktree /tmp/release-out
+          git clone --no-hardlinks "$PWD" /tmp/release-worktree
+          git -C /tmp/release-worktree checkout --detach "$RELEASE_SHA"
 
-          echo "Rebuilding release in clean detached worktree..."
+          echo "Rebuilding release inside pinned Docker container..."
           mkdir -p /tmp/release-out
-          (cd /tmp/release-worktree && ./scripts/repro-build.sh /tmp/release-out)
+          docker run --rm \
+            -u "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            -v /tmp/release-worktree:/workspace \
+            -v /tmp/release-out:/release-out \
+            -w /workspace \
+            --entrypoint /bin/bash \
+            talos-repro:latest \
+            -c "./scripts/repro-build.sh /release-out"
 
           echo "Verifying independent rebuild against attestation..."
           python3 repro/verify-attestation.py "$ATTESTATION" /tmp/release-out

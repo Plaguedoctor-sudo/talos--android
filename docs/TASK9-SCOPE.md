@@ -99,12 +99,16 @@ The six constitutional sovereign aims referenced below are defined in [`CHARTER.
 - **`C.0` — Onboard second write-access reviewer (GATE):**
   Before the first `INDEPENDENT VERIFICATION` row can be merged, the project must have a second write-access reviewer so external verification PRs undergo real peer review rather than repository-admin bypass.
   - **Acceptance:** A second GitHub account with write access, recorded in [`MAINTAINERS.md`](../MAINTAINERS.md) with their PGP or SSH key fingerprint, and **one PR merged under the `Protect main` ruleset WITHOUT admin bypass**.
+  - **Production Signing Ceremony Remediation:** Bootstrap-phase attestations signed from the maintainer workstation are functional for bootstrap only, not production-grade. Establish a production signing ceremony — HSM or air-gapped machine, at least two witnesses, recorded procedure in [`GOVERNANCE.md`](../GOVERNANCE.md).
 - **`C.1` — Update [`repro/README.md`](../repro/README.md) to point at Docker-based build:**
   Independent verifiers must run `make reproducible-docker` (building [`repro/Dockerfile`](../repro/Dockerfile) and executing `make reproducible` inside the pinned container, matching [`.github/workflows/repro.yml`](../.github/workflows/repro.yml)) so their hashes match the hermetic build. Old host-toolchain instructions must be removed or clearly marked deprecated.
 - **`C.2` — Regenerate and re-sign the release attestation:**
   The historical attestation at [`repro/attestation-cce901dfa964d9ffe3f1d85186c7cb4173c61570.json`](../repro/attestation-cce901dfa964d9ffe3f1d85186c7cb4173c61570.json) was produced by the `ubuntu-24.04` host toolchain (`gcc 13.3.0`) and does not match the new hermetic Debian bookworm Docker build (`adcd4f8`). Generate a new attestation via the `make reproducible-docker` container workflow at the post-fix `HEAD`, sign it with the rotated offline key (`28482f20…`), commit the `.sig`, and add a `SIGNED SELF-CHECK` row. Without this, no `INDEPENDENT VERIFICATION` can succeed.
 - **`C.3` — Resolve broken [`flake.nix`](../flake.nix) / [`flake.lock`](../flake.lock):**
   [`flake.lock`](../flake.lock) references a nonexistent `nixpkgs` commit (`205a52458428d015e123c75d869a05ced640b8a5`) and a synthetic `narHash`. Either fix both in a follow-up commit, or delete [`flake.nix`](../flake.nix) and [`flake.lock`](../flake.lock) and note in [`repro/README.md`](../repro/README.md) that Docker is the supported hermetic path. A broken flake is worse than no flake.
+- **Candidate C Future Cleanup Items (Post-C.2, Out of C.2 Scope):**
+  - **Cleanup:** Remove pre-rewrite attestations from [`repro/`](../repro) (`2ae350f`, `36901f`, `cce901d`). They are unreachable and serve no purpose but clutter the attestation directory.
+  - **Cleanup:** Refine `find_release` ordering in [`.github/workflows/repro-independent.yml`](../.github/workflows/repro-independent.yml) before adding a second reachable attestation (currently stops at the first lexicographical reachable `repro/attestation-*.json` when no release tag exists).
 
 ---
 
