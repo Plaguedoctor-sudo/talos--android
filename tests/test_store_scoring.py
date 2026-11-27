@@ -157,6 +157,44 @@ def test_signature_verification_gate(tmp_path):
     assert verify_index(index_file, tampered_sig, test_pub) is False
 
 
+def test_sign_with_raw_32byte_key(tmp_path):
+    """Verify sign_index accepts raw 32-byte binary Ed25519 keys (including non-UTF-8 bytes) and rejects malformed keys."""
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    from store.sign_index import sign_index, verify_index  # type: ignore
+
+    # Include non-UTF-8 byte 0xfe to cover the exact binary-key decoding failure mode
+    raw_priv = b"\x01\x02\x03\x04\xfe" + bytes(range(5, 32))
+    assert len(raw_priv) == 32
+    pub_bytes = (
+        ed25519.Ed25519PrivateKey.from_private_bytes(raw_priv)
+        .public_key()
+        .public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+
+    raw_key_file = tmp_path / "raw-signing.sec"
+    raw_key_file.write_bytes(raw_priv)
+
+    pub_file = tmp_path / "raw-signing.pub"
+    pub_file.write_text(pub_bytes.hex() + "\n", encoding="utf-8")
+
+    payload = tmp_path / "attestation.json"
+    payload.write_text('{"git_sha": "62561843aa9e08c14415d0e0f0a963b269ae1a90"}\n', encoding="utf-8")
+
+    sig_file = tmp_path / "attestation.json.sig"
+    sign_index(payload, raw_key_file, sig_file)
+    assert verify_index(payload, sig_file, pub_file) is True
+
+    # Malformed non-32-byte key must fail clearly naming the file
+    bad_key_file = tmp_path / "bad-signing.sec"
+    bad_key_file.write_bytes(b"\xff\xfe\xfd")
+    with pytest.raises(ValueError, match=r"bad-signing\.sec"):
+        sign_index(payload, bad_key_file, tmp_path / "bad.sig")
+
+
 def test_unsigned_graceful_degradation(tmp_path):
     """When fixture fingerprint is UNPINNED, build produces signed: false, verify exits 1, and UI path is graceful."""
     import os
