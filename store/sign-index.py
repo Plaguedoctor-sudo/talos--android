@@ -87,6 +87,29 @@ def keygen(key_path: Path) -> None:
     print("==========================================================================")
 
 
+def _load_private_key_bytes(key_path: Path) -> bytes:
+    """Load a 32-byte Ed25519 private key from raw binary bytes or UTF-8 hex text."""
+    raw_key = key_path.read_bytes()
+    if len(raw_key) == 32:
+        return raw_key
+
+    try:
+        key_hex = raw_key.decode("utf-8").strip()
+        priv_bytes = bytes.fromhex(key_hex)
+    except (UnicodeDecodeError, ValueError) as err:
+        raise ValueError(
+            f"Invalid Ed25519 private key in {key_path}: expected 32 raw bytes or "
+            f"64 UTF-8 hex characters (got {len(raw_key)} bytes): {err}"
+        ) from err
+
+    if len(priv_bytes) != 32:
+        raise ValueError(
+            f"Invalid Ed25519 private key length in {key_path}: expected 32 bytes, "
+            f"got {len(priv_bytes)} bytes"
+        )
+    return priv_bytes
+
+
 def sign_index(index_path: Path, key_path: Path, sig_path: Path) -> None:
     """Sign index file using Ed25519 secret key and write detached signature."""
     if not HAVE_CRYPTO:
@@ -96,8 +119,7 @@ def sign_index(index_path: Path, key_path: Path, sig_path: Path) -> None:
         raise FileNotFoundError(f"Signing key not found at {key_path}. Run scripts/provision-store-key.sh first.")
 
     raw_data = index_path.read_bytes()
-    key_hex = key_path.read_text(encoding="utf-8").strip()
-    priv_bytes = bytes.fromhex(key_hex)
+    priv_bytes = _load_private_key_bytes(key_path)
     priv = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
 
     signature = priv.sign(raw_data)
